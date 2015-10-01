@@ -61,12 +61,25 @@ double randNum(double rMin, double rMax)
 
 void main()
 {
+	// set up variables to calculate time consumption
+    struct timeval tpstart,tpend;
+    double timeuse;
+    // record the start point
+    gettimeofday(&tpstart,NULL);
+
 	// loop for 20 millions time -> 20,000,000
-	for (int i = 0; i < 20000000; ++i)
+	int i;
+	for (i = 0; i < 20000000; ++i)
 	{
 	    double num = randNum(0, 3);
-	    printf("input number is: %f\n", num);    
+	    // printf("input number is: %f\n", num);    
 	    double res = sqrtLocal(num);
-	    printf("result is: %f, loop count is: %d\n", res, count);
+	    // printf("result is: %f, loop count is: %d\n", res, count);
 	}
+
+	// record the end point
+    gettimeofday(&tpend,NULL);
+    // calculate the time consumption in us
+    timeuse=1000000*(tpend.tv_sec-tpstart.tv_sec)+tpend.tv_usec-tpstart.tv_usec; // notice, should include both s and us
+    printf("Total time:%fms\n",timeuse / 1000);
 }
