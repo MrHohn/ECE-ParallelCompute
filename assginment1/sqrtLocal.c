@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 // global counter to record how many generations we run
-int count = 0;
+// int count = 0;
 
 double absDouble(double num)
 {
@@ -37,7 +37,7 @@ double sqrtLocal(double num)
 	while (1)
 	{
 		// record the loop count
-		++count;
+		// ++count;
 		// apply Newton's method to calculate the sqrt value
 		numCurrent = (numLast + (num / numLast)) / 2;
 		// judge if the accuracy is enough, 10^-4 = 0.0001
@@ -58,27 +58,49 @@ double randNum(double rMin, double rMax)
 	return rMin + ranFraction * (rMax - rMin);
 }
 
+void sqrtAll(int N, double* nums, double* result)
+{
+	// start looping and calculating all the sqrt result
+	int i;
+	for (i = 0; i < N; ++i)
+	{
+	    result[i] = sqrtLocal(nums[i]);
+	    // printf("result is: %f, loop count is: %d\n", result[i], count);
+	}
+}
+
 void main()
 {
+	// generate all the random numbers first
+	// loop for 20 millions time -> 20,000,000
+	int totalNum = 20000000;
+	// allocate memory space for the inputs and results in heap
+	double* nums = malloc(totalNum * sizeof(double));
+	double* result = malloc(totalNum * sizeof(double));
+	int i;
+	// generate random numbers
+	for (i = 0; i < totalNum; ++i)
+	{
+	    nums[i] = randNum(0, 3);
+	    // printf("input number is: %f\n", num[i]);
+	}
+
 	// set up variables to calculate time consumption
 	struct timeval tpstart, tpend;
 	double timeuse;
 	// record the start point
 	gettimeofday(&tpstart, NULL);
 
-	// loop for 20 millions time -> 20,000,000
-	int i;
-	for (i = 0; i < 20000000; ++i)
-	{
-	    double num = randNum(0, 3);
-	    // printf("input number is: %f\n", num);    
-	    double res = sqrtLocal(num);
-	    // printf("result is: %f, loop count is: %d\n", res, count);
-	}
+	// call the sqrtAll function to calculate all the inputs
+	sqrtAll(totalNum, nums, result);
 
 	// record the end point
 	gettimeofday(&tpend, NULL);
 	// calculate the time consumption in us
 	timeuse = 1000000 * (tpend.tv_sec - tpstart.tv_sec) + tpend.tv_usec - tpstart.tv_usec; // notice, should include both s and us
 	printf("Total time:%fms\n", timeuse / 1000);
+
+	// now free the memory
+	free(nums);
+	free(result);
 }
