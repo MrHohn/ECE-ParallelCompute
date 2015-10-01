@@ -42,12 +42,10 @@ double sqrtLocal(double num)
 		numCurrent = (numLast + (num / numLast)) / 2;
 		// judge if the accuracy is enough, 10^-4 = 0.0001
 		if (absDouble(numCurrent - numLast) <= 0.0001)
-			break;
+			return numCurrent;
 		// put the current value as last value to prepare for next loop
 		numLast = numCurrent;
 	}
-
-	return numCurrent;
 }
 
 // function to generate random double number between rMin and rMax
@@ -63,10 +61,10 @@ double randNum(double rMin, double rMax)
 void main()
 {
 	// set up variables to calculate time consumption
-	struct timeval tpstart,tpend;
+	struct timeval tpstart, tpend;
 	double timeuse;
 	// record the start point
-	gettimeofday(&tpstart,NULL);
+	gettimeofday(&tpstart, NULL);
 
 	// loop for 20 millions time -> 20,000,000
 	int i;
