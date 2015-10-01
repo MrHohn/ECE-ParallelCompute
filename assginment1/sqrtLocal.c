@@ -22,9 +22,10 @@ double sqrtLocal(double num)
 		Setup the initial estimation, refer wikipedia's Rough estimation:
 		https://en.wikipedia.org/wiki/Methods_of_computing_square_roots
 		
-		Suppose: sqrt(S) = sqrt(a) * 10^n
-				 sqrt(S) = { 2 * 10^n, if a < 10
-							 6 * 10^n, if a >= 10 }
+		Suppose: 
+		sqrt(S) = sqrt(a) * 10^n
+		sqrt(S) = { 2 * 10^n, if a < 10
+		            6 * 10^n, if a >= 10 }
 
 		Since for this assignment, we always calculate the sqrt of random
 		number between 0 ~ 3, hense a < 10, and n = 0
@@ -62,10 +63,10 @@ double randNum(double rMin, double rMax)
 void main()
 {
 	// set up variables to calculate time consumption
-    struct timeval tpstart,tpend;
-    double timeuse;
-    // record the start point
-    gettimeofday(&tpstart,NULL);
+	struct timeval tpstart,tpend;
+	double timeuse;
+	// record the start point
+	gettimeofday(&tpstart,NULL);
 
 	// loop for 20 millions time -> 20,000,000
 	int i;
@@ -78,8 +79,8 @@ void main()
 	}
 
 	// record the end point
-    gettimeofday(&tpend,NULL);
-    // calculate the time consumption in us
-    timeuse=1000000*(tpend.tv_sec-tpstart.tv_sec)+tpend.tv_usec-tpstart.tv_usec; // notice, should include both s and us
-    printf("Total time:%fms\n",timeuse / 1000);
+	gettimeofday(&tpend,NULL);
+	// calculate the time consumption in us
+	timeuse=1000000*(tpend.tv_sec-tpstart.tv_sec)+tpend.tv_usec-tpstart.tv_usec; // notice, should include both s and us
+	printf("Total time:%fms\n",timeuse / 1000);
 }
