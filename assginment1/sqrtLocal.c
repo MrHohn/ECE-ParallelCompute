@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 // global counter to record how many generations we run
 // int count = 0;
@@ -69,7 +70,7 @@ void sqrtAll(int N, double* nums, double* result)
 	}
 }
 
-void main()
+int main()
 {
 	// generate all the random numbers first
 	// loop for 20 millions time -> 20,000,000
@@ -103,4 +104,6 @@ void main()
 	// now free the memory
 	free(nums);
 	free(result);
+
+	return 0;
 }

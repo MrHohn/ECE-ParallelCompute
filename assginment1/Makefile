@@ -1,12 +1,12 @@
 CC = gcc
 
-CFLAGS +=-c -g -O0 -Wall -std=c++11
+CFLAGS +=-c -g -O0 -Wall
 
 # LFLAGS = 
 
 SOURCES = sqrtLocal.c
 
-OBJECTS = $(SOURCES:.cpp=.o)
+OBJECTS = $(SOURCES:.c=.o)
 
 EXECUTABLE = sqrtLocal
 
@@ -15,7 +15,7 @@ all: $(SOURCES) $(EXECUTABLE)
 $(EXECUTABLE): $(OBJECTS) 
 	$(CC) $(OBJECTS) -o $@ $(LFLAGS) 
 
-.cpp.o:
+.c.o:
 	$(CC) $(CFLAGS) $< -o $@
 
 clean:
