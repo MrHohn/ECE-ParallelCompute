@@ -79,8 +79,8 @@ void main()
 	}
 
 	// record the end point
-	gettimeofday(&tpend,NULL);
+	gettimeofday(&tpend, NULL);
 	// calculate the time consumption in us
-	timeuse=1000000*(tpend.tv_sec-tpstart.tv_sec)+tpend.tv_usec-tpstart.tv_usec; // notice, should include both s and us
-	printf("Total time:%fms\n",timeuse / 1000);
+	timeuse = 1000000 * (tpend.tv_sec - tpstart.tv_sec) + tpend.tv_usec - tpstart.tv_usec; // notice, should include both s and us
+	printf("Total time:%fms\n", timeuse / 1000);
 }
