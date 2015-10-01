@@ -39,7 +39,8 @@ double sqrtLocal(double num)
 		++count;
 		// apply Newton's method to calculate the sqrt value
 		numCurrent = (numLast + (num / numLast)) / 2;
-		if (absDouble(numCurrent - numLast) <= 0.01)
+		// judge if the accuracy is enough, 10^-4 = 0.0001
+		if (absDouble(numCurrent - numLast) <= 0.0001)
 			break;
 		// put the current value as last value to prepare for next loop
 		numLast = numCurrent;
@@ -48,9 +49,24 @@ double sqrtLocal(double num)
 	return numCurrent;
 }
 
+// function to generate random double number between rMin and rMax
+double randNum(double rMin, double rMax)
+{
+	// use the built-in rand() to generate random int number
+	// convert it into fraction of 1
+	double ranFraction = (double)rand() / RAND_MAX;
+	// now convert the result to between range[rMin, rMax]
+	return rMin + ranFraction * (rMax - rMin);
+}
+
 void main()
 {
-    double x = 0.5;
-    double res = sqrtLocal(x);
-    printf("result is: %f, loop count is: %d\n", res, count);
+	// loop for 20 millions time -> 20,000,000
+	for (int i = 0; i < 20000000; ++i)
+	{
+	    double num = randNum(0, 3);
+	    printf("input number is: %f\n", num);    
+	    double res = sqrtLocal(num);
+	    printf("result is: %f, loop count is: %d\n", res, count);
+	}
 }
