@@ -28,7 +28,7 @@ double sqrtLocal(double num)
 		            6 * 10^n, if a >= 10 }
 
 		Since for this assignment, we always calculate the sqrt of random
-		number between 0 ~ 3, hense a < 10, and n = 0
+		number between 0 ~ 3, thus a < 10, and n = 0
 		Hence the initial value would be set as 2 * 10^0 = 2
 	*/
 
