@@ -3,7 +3,8 @@
 #include <sys/time.h>
 
 // global counter to record how many generations we run
-// int count = 0;
+int count = 0;
+int maxGeneration = 0;
 
 double absDouble(double num)
 {
@@ -35,15 +36,24 @@ double sqrtLocal(double num)
 
 	// setup the record for last generation and current generation value
 	double numLast = 2, numCurrent;
+	int curGeneration = 0;
 	while (1)
 	{
 		// record the loop count
-		// ++count;
+		++count;
+		++curGeneration;
 		// apply Newton's method to calculate the sqrt value
 		numCurrent = (numLast + (num / numLast)) / 2;
 		// judge if the accuracy is enough, 10^-4 = 0.0001
 		if (absDouble(numCurrent - numLast) <= 0.0001)
+		{
+			if (curGeneration > maxGeneration)
+			{
+				// record the max generation
+				maxGeneration = curGeneration;
+			}
 			return numCurrent;
+		}
 		// put the current value as last value to prepare for next loop
 		numLast = numCurrent;
 	}
@@ -100,6 +110,15 @@ int main()
 	// calculate the time consumption in us
 	timeuse = 1000000 * (tpend.tv_sec - tpstart.tv_sec) + tpend.tv_usec - tpstart.tv_usec; // notice, should include both s and us
 	printf("Total time:%fms\n", timeuse / 1000);
+
+	// print the inputs and outputs
+	// for (i = 0; i < totalNum; ++i) {
+	// 	printf("input: %f, output: %f\n", nums[i], result[i]);
+	// }
+
+	// print the total generations and max generation
+	printf("total generations: %d\n", count);
+	printf("single max generations: %d\n", maxGeneration);
 
 	// now free the memory
 	free(nums);
