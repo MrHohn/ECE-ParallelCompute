@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
+#include <time.h>
 
 // global counter to record how many generations we run
 int count = 0;
@@ -89,6 +90,8 @@ int main()
 	double* nums = malloc(totalNum * sizeof(double));
 	double* result = malloc(totalNum * sizeof(double));
 	int i;
+	// initiallize the random seed by current time to avoid duplicate
+	srand(time(NULL));
 	// generate random numbers
 	for (i = 0; i < totalNum; ++i)
 	{
