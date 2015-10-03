@@ -11,8 +11,7 @@ double absDouble(double num)
 void sqrt_serial(int N, double* nums, double* result)
 {
 	// start looping and calculating all the sqrt result
-	int i;
-	for (i = 0; i < N; ++i)
+	for (int i = 0; i < N; ++i)
 	{
 		// if input num is 0, return 0
 		if (nums[i] == 0)
@@ -51,8 +50,6 @@ void sqrt_serial(int N, double* nums, double* result)
 			// put the current value as last value to prepare for next loop
 			numLast = numCurrent;
 		}
-
-
 	}
 }
 

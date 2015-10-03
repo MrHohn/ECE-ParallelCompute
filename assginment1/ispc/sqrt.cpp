@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <time.h>
+// Include the header file that the ispc compiler generates
+#include "sqrt_ispc.h"
+using namespace ispc;
 
 extern void sqrt_serial(int N, double* nums, double* result);
 
@@ -23,11 +26,10 @@ int main()
 	// allocate memory space for the inputs and results in heap
 	double* nums = (double*) malloc(totalNum * sizeof(double));
 	double* result = (double*) malloc(totalNum * sizeof(double));
-	int i;
 	// initiallize the random seed by current time to avoid duplicate
 	srand(time(NULL));
 	// generate random numbers
-	for (i = 0; i < totalNum; ++i)
+	for (int i = 0; i < totalNum; ++i)
 	{
 	    nums[i] = randNum(0, 3);
 	    // printf("input number is: %f\n", num[i]);
@@ -36,20 +38,40 @@ int main()
 	// set up variables to calculate time consumption
 	struct timeval tpstart, tpend;
 	double timeuse;
+	
+	printf("Run the serial version first...\n");
 	// record the start point
 	gettimeofday(&tpstart, NULL);
 
-	// call the sqrtAll function to calculate all the inputs
+	// call the sqrt_serial function to calculate all the inputs
 	sqrt_serial(totalNum, nums, result);
 
 	// record the end point
 	gettimeofday(&tpend, NULL);
 	// calculate the time consumption in us
 	timeuse = 1000000 * (tpend.tv_sec - tpstart.tv_sec) + tpend.tv_usec - tpstart.tv_usec; // notice, should include both s and us
-	printf("Total time:%fms\n", timeuse / 1000);
+	printf("Serial version time consumption:%fms\n", timeuse / 1000);
 
 	// print the inputs and outputs
-	// for (i = 0; i < totalNum; ++i) {
+	// for (int i = 0; i < totalNum; ++i) {
+	// 	printf("input: %f, output: %f\n", nums[i], result[i]);
+	// }
+
+	printf("Now run the ISPC version...\n");
+	// record the start point
+	gettimeofday(&tpstart, NULL);
+
+	// call the sqrtAll function to calculate all the inputs
+	sqrt_ispc(totalNum, nums, result);
+
+	// record the end point
+	gettimeofday(&tpend, NULL);
+	// calculate the time consumption in us
+	timeuse = 1000000 * (tpend.tv_sec - tpstart.tv_sec) + tpend.tv_usec - tpstart.tv_usec; // notice, should include both s and us
+	printf("ISPC version time consumption:%fms\n", timeuse / 1000);
+
+	// print the inputs and outputs
+	// for (int i = 0; i < totalNum; ++i) {
 	// 	printf("input: %f, output: %f\n", nums[i], result[i]);
 	// }
 
