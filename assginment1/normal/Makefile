@@ -1,6 +1,7 @@
-CC = gcc
+# CC = gcc
+CC = clang
 
-CFLAGS +=-c -g -O0 -Wall
+CFLAGS +=-c -g -O3 -Wall
 
 # LFLAGS = 
 

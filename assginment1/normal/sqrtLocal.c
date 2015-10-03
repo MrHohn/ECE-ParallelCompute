@@ -7,7 +7,7 @@
 int count = 0;
 int maxGeneration = 0;
 
-double absDouble(double num)
+float absFloat(float num)
 {
 	if (num < 0)
 		return -num;
@@ -15,7 +15,7 @@ double absDouble(double num)
 		return num; 
 }
 
-double sqrtLocal(double num)
+float sqrtLocal(float num)
 {
 	// if input num is 0, return 0
 	if (num == 0)
@@ -36,7 +36,7 @@ double sqrtLocal(double num)
 	*/
 
 	// setup the record for last generation and current generation value
-	double numLast = 2, numCurrent;
+	float numLast = 2, numCurrent;
 	int curGeneration = 0;
 	while (1)
 	{
@@ -46,7 +46,7 @@ double sqrtLocal(double num)
 		// apply Newton's method to calculate the sqrt value
 		numCurrent = (numLast + (num / numLast)) / 2;
 		// judge if the accuracy is enough, 10^-4 = 0.0001
-		if (absDouble(numCurrent - numLast) <= 0.0001)
+		if (absFloat(numCurrent - numLast) <= 0.0001)
 		{
 			if (curGeneration > maxGeneration)
 			{
@@ -60,17 +60,17 @@ double sqrtLocal(double num)
 	}
 }
 
-// function to generate random double number between rMin and rMax
-double randNum(double rMin, double rMax)
+// function to generate random float number between rMin and rMax
+float randNum(float rMin, float rMax)
 {
 	// use the built-in rand() to generate random int number
 	// convert it into fraction of 1
-	double ranFraction = (double)rand() / RAND_MAX;
+	float ranFraction = (float)rand() / RAND_MAX;
 	// now convert the result to between range[rMin, rMax]
 	return rMin + ranFraction * (rMax - rMin);
 }
 
-void sqrtAll(int N, double* nums, double* result)
+void sqrtAll(int N, float* nums, float* result)
 {
 	// start looping and calculating all the sqrt result
 	int i;
@@ -87,8 +87,8 @@ int main()
 	// loop for 20 millions time -> 20,000,000
 	int totalNum = 20000000;
 	// allocate memory space for the inputs and results in heap
-	double* nums = malloc(totalNum * sizeof(double));
-	double* result = malloc(totalNum * sizeof(double));
+	float* nums = malloc(totalNum * sizeof(float));
+	float* result = malloc(totalNum * sizeof(float));
 	int i;
 	// initiallize the random seed by current time to avoid duplicate
 	srand(time(NULL));
@@ -101,7 +101,7 @@ int main()
 
 	// set up variables to calculate time consumption
 	struct timeval tpstart, tpend;
-	double timeuse;
+	float timeuse;
 	// record the start point
 	gettimeofday(&tpstart, NULL);
 
