@@ -1,5 +1,5 @@
 
-double abs_ispc(double num)
+inline float abs_ispc(float num)
 {
     if (num < 0)
         return -num;
@@ -7,12 +7,17 @@ double abs_ispc(double num)
         return num; 
 }
 
-export void sqrt_ispc(uniform int N, uniform double nums[], uniform double result[])
+export void sqrt_ispc(uniform int N, uniform float nums[], uniform float result[])
 {
     foreach (index = 0 ... N)
     {
         // Load the appropriate input value for this program instance.
-        double numSingle = nums[index], res = 0;
+        float numSingle = nums[index], res = 0;
+
+        // Setup the accuracy, 10^-4 = 0.0001
+        uniform float base = 2;
+        uniform float accuracy = 0.0001;
+
         // if input num is 0, return 0
         if (numSingle != 0)
         {
@@ -31,13 +36,13 @@ export void sqrt_ispc(uniform int N, uniform double nums[], uniform double resul
             */
 
             // setup the record for last generation and current generation value
-            double numLast = 2, numCurrent;
+            float numLast = 2, numCurrent;
             while (1)
             {
                 // apply Newton's method to calculate the sqrt value
-                numCurrent = (numLast + (numSingle / numLast)) / 2;
+                numCurrent = (numLast + (numSingle / numLast)) / base;
                 // judge if the accuracy is enough, 10^-4 = 0.0001
-                if (abs_ispc(numCurrent - numLast) <= 0.0001)
+                if (abs_ispc(numCurrent - numLast) <= accuracy)
                 {
                     res = numCurrent;
                     break;

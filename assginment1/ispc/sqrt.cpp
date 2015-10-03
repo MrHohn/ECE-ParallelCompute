@@ -6,14 +6,14 @@
 #include "sqrt_ispc.h"
 using namespace ispc;
 
-extern void sqrt_serial(int N, double* nums, double* result);
+extern void sqrt_serial(int N, float* nums, float* result);
 
-// function to generate random double number between rMin and rMax
-double randNum(double rMin, double rMax)
+// function to generate random float number between rMin and rMax
+float randNum(float rMin, float rMax)
 {
 	// use the built-in rand() to generate random int number
 	// convert it into fraction of 1
-	double ranFraction = (double)rand() / RAND_MAX;
+	float ranFraction = (float)rand() / RAND_MAX;
 	// now convert the result to between range[rMin, rMax]
 	return rMin + ranFraction * (rMax - rMin);
 }
@@ -24,8 +24,8 @@ int main()
 	// loop for 20 millions time -> 20,000,000
 	int totalNum = 20000000;
 	// allocate memory space for the inputs and results in heap
-	double* nums = (double*) malloc(totalNum * sizeof(double));
-	double* result = (double*) malloc(totalNum * sizeof(double));
+	float* nums = (float*) malloc(totalNum * sizeof(float));
+	float* result = (float*) malloc(totalNum * sizeof(float));
 	// initiallize the random seed by current time to avoid duplicate
 	srand(time(NULL));
 	// generate random numbers
@@ -37,7 +37,7 @@ int main()
 
 	// set up variables to calculate time consumption
 	struct timeval tpstart, tpend;
-	double timeuse;
+	float timeuse;
 	
 	printf("Run the serial version first...\n");
 	// record the start point

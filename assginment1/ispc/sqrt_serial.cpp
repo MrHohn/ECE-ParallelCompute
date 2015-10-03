@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-double absDouble(double num)
+float abs_serial(float num)
 {
 	if (num < 0)
 		return -num;
@@ -8,7 +8,7 @@ double absDouble(double num)
 		return num; 
 }
 
-void sqrt_serial(int N, double* nums, double* result)
+void sqrt_serial(int N, float* nums, float* result)
 {
 	// start looping and calculating all the sqrt result
 	for (int i = 0; i < N; ++i)
@@ -35,13 +35,13 @@ void sqrt_serial(int N, double* nums, double* result)
 		*/
 
 		// setup the record for last generation and current generation value
-		double numLast = 2, numCurrent;
+		float numLast = 2, numCurrent;
 		while (1)
 		{
 			// apply Newton's method to calculate the sqrt value
 			numCurrent = (numLast + (nums[i] / numLast)) / 2;
 			// judge if the accuracy is enough, 10^-4 = 0.0001
-			if (absDouble(numCurrent - numLast) <= 0.0001)
+			if (abs_serial(numCurrent - numLast) <= 0.0001)
 			{
 				result[i] = numCurrent;
 			    // printf("result is: %f\n", result[i]);
