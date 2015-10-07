@@ -11,6 +11,18 @@ using namespace std;
 
 extern void sqrt_serial(int N, float* nums, float* result);
 
+// function to judge the correctness of the result
+bool check(float* oldRes, float* newRes, int len)
+{
+	for (int i = 0; i < len; ++i)
+	{
+		if (oldRes[i] != newRes[i])
+			return false;
+	}
+
+	return true;
+}
+
 // function to generate random float number between rMin and rMax
 float randNum(float rMin, float rMax)
 {
@@ -23,6 +35,7 @@ float randNum(float rMin, float rMax)
 
 int main()
 {
+	// define the total iteration of testing
 	static int test_iteration = 3;
 
 	// generate all the random numbers first
@@ -31,6 +44,8 @@ int main()
 	// allocate memory space for the inputs and results in heap
 	float* nums = (float*) malloc(totalNum * sizeof(float));
 	float* result = (float*) malloc(totalNum * sizeof(float));
+	// keep a copy of the result to check the correctness
+	float* result_check = (float*) malloc(totalNum * sizeof(float));
 	// initiallize the random seed by current time to avoid duplicate
 	srand(time(NULL));
 	// generate random numbers
@@ -55,14 +70,13 @@ int main()
 	}
 	printf("[best of sqrt_serial]:\t\t\t[%.3f] million cycles\n\n", minSerial);
 
-	// print the inputs and outputs
-	// for (int i = 0; i < totalNum; ++i) {
-	// 	printf("input: %f, output: %f\n", nums[i], result[i]);
-	// }
-
-	// Clear out the result buffer
-    for (int i = 0; i < totalNum; ++i)
-        result[i] = 0;
+	printf("Now save the result for check...\n\n");
+	// Copy out and clear the result buffer
+	for (int i = 0; i < totalNum; ++i)
+	{
+		result_check[i] = result[i];
+		result[i] = 0;
+	}
 
 	printf("Now run the ISPC version...\n");
 	double minISPC = 1e30;
@@ -78,13 +92,16 @@ int main()
 		minISPC = min(minISPC, one_round);
 	}
 	printf("[best of sqrt_ISPC]:\t\t\t[%.3f] million cycles\n\n", minISPC);
+	
+	// calculate the speedup
+	printf("\t\t\t\t\t(%.2fx speedup from ISPC)\n\n", minSerial/minISPC);
 
-	// print the inputs and outputs
-	// for (int i = 0; i < totalNum; ++i) {
-	// 	printf("input: %f, output: %f\n", nums[i], result[i]);
-	// }
-
-	printf("\t\t\t\t\t(%.2fx speedup from ISPC)\n", minSerial/minISPC);
+	// now check the result
+	printf("Now check the correctness...\n");
+	if (check(result_check, result, totalNum))
+		printf("Output correct!\n\n");
+	else
+		printf("Output incorrect!\n\n");
 
 	// now free the memory
 	free(nums);
