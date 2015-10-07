@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-float abs_serial(float num)
+static inline float abs_serial(float num)
 {
 	if (num < 0)
 		return -num;

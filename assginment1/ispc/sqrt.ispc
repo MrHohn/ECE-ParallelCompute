@@ -1,5 +1,5 @@
 
-inline float abs_ispc(float num)
+static inline float abs_ispc(float num)
 {
     if (num < 0)
         return -num;
@@ -9,14 +9,14 @@ inline float abs_ispc(float num)
 
 export void sqrt_ispc(uniform int N, uniform float nums[], uniform float result[])
 {
+    // Setup the accuracy, 10^-4 = 0.0001
+    uniform float base = 2;
+    uniform float accuracy = 0.0001;
+
     foreach (index = 0 ... N)
     {
         // Load the appropriate input value for this program instance.
         float numSingle = nums[index], res = 0;
-
-        // Setup the accuracy, 10^-4 = 0.0001
-        uniform float base = 2;
-        uniform float accuracy = 0.0001;
 
         // if input num is 0, return 0
         if (numSingle != 0)
