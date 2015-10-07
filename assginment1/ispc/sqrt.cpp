@@ -41,11 +41,13 @@ int main()
 	// generate all the random numbers first
 	// loop for 20 millions time -> 20,000,000
 	int totalNum = 20000000;
+
 	// allocate memory space for the inputs and results in heap
 	float* nums = (float*) malloc(totalNum * sizeof(float));
 	float* result = (float*) malloc(totalNum * sizeof(float));
 	// keep a copy of the result to check the correctness
 	float* result_check = (float*) malloc(totalNum * sizeof(float));
+
 	// initiallize the random seed by current time to avoid duplicate
 	srand(time(NULL));
 	// generate random numbers
@@ -91,7 +93,7 @@ int main()
 		printf("time of ISPC run:\t\t\t[%.3f] million cycles\n", one_round);
 		minISPC = min(minISPC, one_round);
 	}
-	printf("[best of sqrt_ISPC]:\t\t\t[%.3f] million cycles\n\n", minISPC);
+	printf("[best of sqrt_ISPC]:\t\t\t[%.3f] million cycles\n", minISPC);
 	
 	// calculate the speedup
 	printf("\t\t\t\t\t(%.2fx speedup from ISPC)\n\n", minSerial/minISPC);

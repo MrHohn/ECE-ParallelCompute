@@ -2,7 +2,7 @@
 CXX=clang++ -m32
 CXXFLAGS=-Iobjs/ -I/usr/include/i386-linux-gnu/c++/4.7 -O3 -Wall
 ISPC=ispc
-ISPCFLAGS=-O2 --arch=x86 --target=sse2
+ISPCFLAGS=-O2 --arch=x86 --target=avx2
 
 default: sqrt
 

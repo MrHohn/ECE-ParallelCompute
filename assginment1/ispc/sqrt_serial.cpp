@@ -13,7 +13,7 @@ void sqrt_serial(int N, float* nums, float* result)
 	// start looping and calculating all the sqrt result
 	for (int i = 0; i < N; ++i)
 	{
-		// if input num is 0, return 0
+		// if input num is 0, output 0
 		if (nums[i] == 0)
 		{
 			result[i] = 0;
