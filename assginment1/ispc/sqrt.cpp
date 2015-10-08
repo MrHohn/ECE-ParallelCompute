@@ -4,6 +4,7 @@
 #include <time.h>
 #include <algorithm>
 #include <math.h>
+#include "immintrin.h"
 // Using the same timing functions as the sample mandelbrot of ISPC
 #include "timing.h"
 // Include the header file that the ispc compiler generates
@@ -12,6 +13,7 @@ using namespace ispc;
 using namespace std;
 
 extern void sqrt_serial(int N, float* nums, float* result);
+extern void sqrt_avx(int N, float* nums, float* result);
 
 // function to judge the correctness of the result
 bool check(float* exactRes, float* newRes, int len)
@@ -43,10 +45,11 @@ int main()
 	// generate all the random numbers first
 	// loop for 20 millions time -> 20,000,000
 	int totalNum = 20 * 1000 * 1000;
+	// int totalNum = 8;
 
 	// allocate memory space for the inputs and results in heap
-	float* nums = (float*) malloc(totalNum * sizeof(float));
-	float* result = (float*) malloc(totalNum * sizeof(float));
+	float* nums = (float*) _mm_malloc(totalNum * sizeof(float), 32);
+	float* result = (float*) _mm_malloc(totalNum * sizeof(float), 32);
 	// keep a copy of the result to check the correctness
 	float* result_exact = (float*) malloc(totalNum * sizeof(float));
 
@@ -108,7 +111,7 @@ int main()
 	printf("[best of sqrt_ispc]:\t\t\t[%.3f] million cycles\n", minISPC);
 	
 	// calculate the speedup
-	printf("\t\t\t\t\t(%.2fx speedup from ISPC)\n", minSerial / minISPC);
+	printf("\t\t\t\t\t(%.2fx speedup from ISPC avx1-i32x8)\n", minSerial / minISPC);
 
 	// now check the result
 	printf("Now check the correctness...");
@@ -149,11 +152,44 @@ int main()
 	else
 		printf("\t\tOutput incorrect!\n\n");
 
+	printf("-------------------- NEXT: AVX INTRINSICS ------------------\n\n");
+	// clear the result buffer
+	for (int i = 0; i < totalNum; ++i)
+	{
+		result[i] = 0;
+	}
+
+	printf("Now run the AVX intrinsics...\n");
+	double minAVX = 1e30;
+	for (int i = 0; i < test_iteration; ++i)
+	{
+		// start to record time consumption
+		reset_and_start_timer();
+		// call the sqrt_ispc function to calculate all the inputs
+		sqrt_avx(totalNum, nums, result);
+		// stop timer and print out total cycles
+		double one_round = get_elapsed_mcycles();
+		printf("time of ISPC run %d:\t\t\t[%.3f] million cycles\n", i + 1, one_round);
+		minAVX = min(minAVX, one_round);
+	}
+	printf("[best of sqrt_ispc_task]:\t\t[%.3f] million cycles\n", minAVX);
+	
+	// calculate the speedup
+	printf("\t\t\t\t\t(%.2fx speedup from AVX intrinsics)\n", minSerial / minAVX);
+
+	// now check the result
+	printf("Now check the correctness...");
+	if (check(result_exact, result, totalNum))
+		printf("\t\tOutput correct!\n\n");
+	else
+		printf("\t\tOutput incorrect!\n\n");
+
 	printf("------------------------- TEST END -------------------------\n\n");
 
 	// now free the memory
-	free(nums);
-	free(result);
+	delete[] nums;
+	delete[] result;
+	delete[] result_exact;
 
 	return 0;
 }
