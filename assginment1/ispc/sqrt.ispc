@@ -44,6 +44,7 @@ export void sqrt_ispc(uniform int N, uniform float nums[], uniform float result[
 task void sqrt_task(uniform int N, uniform float nums[], uniform float result[], uniform int span)
 {
     uniform int istart = taskIndex * span;
+    // choose the smaller in case N could not be divided by # of tasks
     uniform int iend = min((taskIndex + 1) * span, (unsigned int) N);
 
     foreach (index = istart ... iend)

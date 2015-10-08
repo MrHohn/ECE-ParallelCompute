@@ -1,9 +1,9 @@
 
 CXX=clang++
-CXXCFLAGS=-Iobjs/ -Icommon -I/usr/include/i386-linux-gnu/c++/4.7 -O3 -Wall
+CXXCFLAGS=-Iobjs/ -Icommon -I/usr/include/i386-linux-gnu/c++/4.7 -O3 -Wall -g -mavx
 CXXLFLAGS=-lpthread
 ISPC=ispc
-ISPCFLAGS=-O2 --arch=x86 --target=avx2-i32x16
+ISPCFLAGS=-O2 --arch=x86 --target=avx1-i32x8
 TASKSYS_SOURCE=common/tasksys.cpp
 
 default: sqrt
@@ -17,13 +17,16 @@ dirs:
 clean:
 	/bin/rm -rf objs *~ sqrt
 
-sqrt: dirs  objs/sqrt.o objs/sqrt_ispc.o objs/sqrt_serial.o objs/tasksys.o
-	$(CXX) $(CXXCFLAGS) -o $@ objs/sqrt.o objs/sqrt_ispc.o objs/sqrt_serial.o objs/tasksys.o $(CXXLFLAGS)
+sqrt: dirs  objs/sqrt.o objs/sqrt_ispc.o objs/sqrt_serial.o objs/tasksys.o objs/sqrt_avx.o
+	$(CXX) $(CXXCFLAGS) -o $@ objs/sqrt.o objs/sqrt_ispc.o objs/sqrt_serial.o objs/sqrt_avx.o objs/tasksys.o $(CXXLFLAGS)
 
 objs/sqrt.o: sqrt.cpp objs/sqrt_ispc.h 
 	$(CXX) $(CXXCFLAGS) -c -o $@ $<
 
 objs/sqrt_serial.o: sqrt_serial.cpp 
+	$(CXX) $(CXXCFLAGS) -c -o $@ $<
+
+objs/sqrt_avx.o: sqrt_avx.cpp 
 	$(CXX) $(CXXCFLAGS) -c -o $@ $<
 
 objs/tasksys.o: $(TASKSYS_SOURCE)
