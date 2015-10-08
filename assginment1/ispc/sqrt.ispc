@@ -80,7 +80,8 @@ task void sqrt_task(uniform int N, uniform float nums[], uniform float result[],
 
 export void sqrt_ispc_task(uniform int N, uniform float nums[], uniform float result[])
 {
-    uniform int span = N / 4; // 4 tasks parallism, a span is quarter N
+    uniform int parallel = 4; // 4 tasks parallism
+    uniform int span = N / parallel; // one span is quarter N
 
-    launch[N / span] sqrt_task(N, nums, result, span);
+    launch[parallel] sqrt_task(N, nums, result, span);
 }
