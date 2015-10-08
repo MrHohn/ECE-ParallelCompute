@@ -20,28 +20,23 @@ export void sqrt_ispc(uniform int N, uniform float nums[], uniform float result[
     foreach (index = 0 ... N)
     {
         // Load the appropriate input value for this program instance.
-        float numInput = nums[index], res = 0;
+        float numInput = nums[index];
 
-        // if input num is 0, return 0
-        if (numInput != 0)
+        // setup the record for previous generation and current generation value
+        float numPrev = guess, numCurrent, diff = 1.f;
+        // judge if the accuracy is enough, 10^-4
+        while (diff > accuracy)
         {
-            // setup the record for previous generation and current generation value
-            float numPrev = guess, numCurrent, diff = 1.f;
-            // judge if the accuracy is enough, 10^-4
-            while (diff > accuracy)
-            {
-                // apply Newton's method to calculate the sqrt value
-                // https://en.wikipedia.org/wiki/Newton%27s_method#Square_root_of_a_number
-                numCurrent = (numPrev + numInput / numPrev) * 0.5f;
-                diff = abs(numCurrent - numPrev);
-                // put the current value as previous value to prepare for next loop
-                numPrev = numCurrent;
-            }
-            res = numCurrent;
+            // apply Newton's method to calculate the sqrt value
+            // https://en.wikipedia.org/wiki/Newton%27s_method#Square_root_of_a_number
+            numCurrent = (numPrev + numInput / numPrev) * 0.5f;
+            diff = abs(numCurrent - numPrev);
+            // put the current value as previous value to prepare for next loop
+            numPrev = numCurrent;
         }
 
         // Write the result to the output array.
-        result[index] = res;
+        result[index] = numCurrent;
     }
 }
 
@@ -54,28 +49,23 @@ task void sqrt_task(uniform int N, uniform float nums[], uniform float result[],
     foreach (index = istart ... iend)
     {
         // Load the appropriate input value for this program instance.
-        float numInput = nums[index], res = 0;
+        float numInput = nums[index];
 
-        // if input num is 0, return 0
-        if (numInput != 0)
+        // setup the record for previous generation and current generation value
+        float numPrev = guess, numCurrent, diff = 1.f;
+        // judge if the accuracy is enough, 10^-4
+        while (diff > accuracy)
         {
-            // setup the record for previous generation and current generation value
-            float numPrev = guess, numCurrent, diff = 1.f;
-            // judge if the accuracy is enough, 10^-4
-            while (diff > accuracy)
-            {
-                // apply Newton's method to calculate the sqrt value
-                // https://en.wikipedia.org/wiki/Newton%27s_method#Square_root_of_a_number
-                numCurrent = (numPrev + numInput / numPrev) * 0.5f;
-                diff = abs(numCurrent - numPrev);
-                // put the current value as previous value to prepare for next loop
-                numPrev = numCurrent;
-            }
-            res = numCurrent;
+            // apply Newton's method to calculate the sqrt value
+            // https://en.wikipedia.org/wiki/Newton%27s_method#Square_root_of_a_number
+            numCurrent = (numPrev + numInput / numPrev) * 0.5f;
+            diff = abs(numCurrent - numPrev);
+            // put the current value as previous value to prepare for next loop
+            numPrev = numCurrent;
         }
 
         // Write the result to the output array.
-        result[index] = res;
+        result[index] = numCurrent;
     }
 }
 

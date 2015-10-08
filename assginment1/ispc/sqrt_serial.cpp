@@ -22,13 +22,6 @@ void sqrt_serial(int N, float* nums, float* result)
 	// start looping and calculating all the sqrt result
 	for (int i = 0; i < N; ++i)
 	{
-		// if input num is 0, output 0
-		if (nums[i] == 0)
-		{
-			result[i] = 0;
-			continue;
-		}
-
 		// setup the record for previous generation and current generation value
 		float numPrev = guess, numCurrent, diff = 1;
 		// judge if the accuracy is enough, 10^-4 = 0.0001
