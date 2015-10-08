@@ -12,27 +12,27 @@
     Hence the initial value would be set as 2 * 10^0 = 2
 */
 const float guess = 2.f;
-// Setup the accuracy, 10^-4 = 0.0001
-const float accuracy = 0.0001f;
+// Setup the accuracy, 10^-4
+const float accuracy = 1e-4;
 
 export void sqrt_ispc(uniform int N, uniform float nums[], uniform float result[])
 {
     foreach (index = 0 ... N)
     {
         // Load the appropriate input value for this program instance.
-        float numInput = nums[index], res = 0.f;
+        float numInput = nums[index], res = 0;
 
         // if input num is 0, return 0
-        if (numInput != 0.f)
+        if (numInput != 0)
         {
             // setup the record for last generation and current generation value
-            float numLast = guess, numCurrent, diff = 1;
-            // judge if the accuracy is enough, 10^-4 = 0.0001
+            float numLast = guess, numCurrent, diff = 1.f;
+            // judge if the accuracy is enough, 10^-4
             while (diff > accuracy)
             {
                 // apply Newton's method to calculate the sqrt value
                 // https://en.wikipedia.org/wiki/Newton%27s_method#Square_root_of_a_number
-                numCurrent = (numLast + (numInput / numLast)) * 0.5f;
+                numCurrent = (numLast + numInput / numLast) * 0.5f;
                 diff = abs(numCurrent - numLast);
                 // put the current value as last value to prepare for next loop
                 numLast = numCurrent;
@@ -43,4 +43,44 @@ export void sqrt_ispc(uniform int N, uniform float nums[], uniform float result[
         // Write the result to the output array.
         result[index] = res;
     }
+}
+
+task void sqrt_task(uniform int N, uniform float nums[], uniform float result[], uniform int span)
+{
+    uniform int istart = taskIndex * span;
+    uniform int iend = min((taskIndex + 1) * span, (unsigned int) N);
+
+    foreach (index = istart ... iend)
+    {
+        // Load the appropriate input value for this program instance.
+        float numInput = nums[index], res = 0;
+
+        // if input num is 0, return 0
+        if (numInput != 0)
+        {
+            // setup the record for last generation and current generation value
+            float numLast = guess, numCurrent, diff = 1.f;
+            // judge if the accuracy is enough, 10^-4
+            while (diff > accuracy)
+            {
+                // apply Newton's method to calculate the sqrt value
+                // https://en.wikipedia.org/wiki/Newton%27s_method#Square_root_of_a_number
+                numCurrent = (numLast + numInput / numLast) * 0.5f;
+                diff = abs(numCurrent - numLast);
+                // put the current value as last value to prepare for next loop
+                numLast = numCurrent;
+            }
+            res = numCurrent;
+        }
+
+        // Write the result to the output array.
+        result[index] = res;
+    }
+}
+
+export void sqrt_ispc_task(uniform int N, uniform float nums[], uniform float result[])
+{
+    uniform int span = N / 4; // 4 tasks parallism, a span is quarter N
+
+    launch[N / span] sqrt_task(N, nums, result, span);
 }

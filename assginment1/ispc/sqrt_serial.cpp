@@ -14,8 +14,8 @@
     Hence the initial value would be set as 2 * 10^0 = 2
 */
 const float guess = 2.f;
-// Setup the accuracy, 10^-4 = 0.0001
-const float accuracy = 0.0001f;
+// Setup the accuracy, 10^-4
+const float accuracy = 1e-4;
 
 void sqrt_serial(int N, float* nums, float* result)
 {
@@ -36,7 +36,7 @@ void sqrt_serial(int N, float* nums, float* result)
 		{
 			// apply Newton's method to calculate the sqrt value
 			// https://en.wikipedia.org/wiki/Newton%27s_method#Square_root_of_a_number
-			numCurrent = (numLast + (nums[i] / numLast)) * 0.5f;
+			numCurrent = (numLast + nums[i] / numLast) * 0.5f;
 			diff = fabs(numCurrent - numLast);
 			// put the current value as last value to prepare for next loop
 			numLast = numCurrent;
