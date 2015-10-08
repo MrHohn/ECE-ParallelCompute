@@ -3,6 +3,7 @@
 #include <sys/time.h>
 #include <time.h>
 #include <algorithm>
+#include <math.h>
 #include "timing.h"
 // Include the header file that the ispc compiler generates
 #include "sqrt_ispc.h"
@@ -12,11 +13,11 @@ using namespace std;
 extern void sqrt_serial(int N, float* nums, float* result);
 
 // function to judge the correctness of the result
-bool check(float* oldRes, float* newRes, int len)
+bool check(float* exactRes, float* newRes, int len)
 {
 	for (int i = 0; i < len; ++i)
 	{
-		if (oldRes[i] != newRes[i])
+		if (fabs(exactRes[i] - newRes[i]) > 0.0001f)
 			return false;
 	}
 
@@ -46,15 +47,17 @@ int main()
 	float* nums = (float*) malloc(totalNum * sizeof(float));
 	float* result = (float*) malloc(totalNum * sizeof(float));
 	// keep a copy of the result to check the correctness
-	float* result_check = (float*) malloc(totalNum * sizeof(float));
+	float* result_exact = (float*) malloc(totalNum * sizeof(float));
 
 	// initiallize the random seed by current time to avoid duplicate
 	srand(time(NULL));
-	// generate random numbers
+	// generate random numbers and calculate the real sqrt
 	for (int i = 0; i < totalNum; ++i)
 	{
 	    nums[i] = randNum(0, 3);
 	    // printf("input number is: %f\n", num[i]);
+	    result_exact[i] = sqrt(nums[i]);
+	    result[i] = 0;
 	}
 	
 	printf("\nRun the serial version first...\n");
@@ -70,13 +73,18 @@ int main()
 		printf("time of serial run:\t\t\t[%.3f] million cycles\n", one_round);
 		minSerial = min(minSerial, one_round);
 	}
-	printf("[best of sqrt_serial]:\t\t\t[%.3f] million cycles\n\n", minSerial);
+	printf("[best of sqrt_serial]:\t\t\t[%.3f] million cycles\n", minSerial);
 
-	printf("Now save the result for check...\n\n");
-	// Copy out and clear the result buffer
+	// now check the result
+	printf("Now check the correctness...");
+	if (check(result_exact, result, totalNum))
+		printf("\tOutput correct!\n\n");
+	else
+		printf("\tOutput incorrect!\n\n");	
+
+	// clear the result buffer
 	for (int i = 0; i < totalNum; ++i)
 	{
-		result_check[i] = result[i];
 		result[i] = 0;
 	}
 
@@ -96,14 +104,14 @@ int main()
 	printf("[best of sqrt_ISPC]:\t\t\t[%.3f] million cycles\n", minISPC);
 	
 	// calculate the speedup
-	printf("\t\t\t\t\t(%.2fx speedup from ISPC)\n\n", minSerial/minISPC);
+	printf("\t\t\t\t\t(%.2fx speedup from ISPC)\n", minSerial/minISPC);
 
 	// now check the result
-	printf("Now check the correctness...\n");
-	if (check(result_check, result, totalNum))
-		printf("Output correct!\n\n");
+	printf("Now check the correctness...");
+	if (check(result_exact, result, totalNum))
+		printf("\tOutput correct!\n\n");
 	else
-		printf("Output incorrect!\n\n");
+		printf("\tOutput incorrect!\n\n");
 
 	// now free the memory
 	free(nums);
