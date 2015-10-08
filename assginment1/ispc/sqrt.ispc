@@ -25,17 +25,17 @@ export void sqrt_ispc(uniform int N, uniform float nums[], uniform float result[
         // if input num is 0, return 0
         if (numInput != 0)
         {
-            // setup the record for last generation and current generation value
-            float numLast = guess, numCurrent, diff = 1.f;
+            // setup the record for previous generation and current generation value
+            float numPrev = guess, numCurrent, diff = 1.f;
             // judge if the accuracy is enough, 10^-4
             while (diff > accuracy)
             {
                 // apply Newton's method to calculate the sqrt value
                 // https://en.wikipedia.org/wiki/Newton%27s_method#Square_root_of_a_number
-                numCurrent = (numLast + numInput / numLast) * 0.5f;
-                diff = abs(numCurrent - numLast);
-                // put the current value as last value to prepare for next loop
-                numLast = numCurrent;
+                numCurrent = (numPrev + numInput / numPrev) * 0.5f;
+                diff = abs(numCurrent - numPrev);
+                // put the current value as previous value to prepare for next loop
+                numPrev = numCurrent;
             }
             res = numCurrent;
         }
@@ -45,6 +45,7 @@ export void sqrt_ispc(uniform int N, uniform float nums[], uniform float result[
     }
 }
 
+// task for sqrt_ispc_task
 task void sqrt_task(uniform int N, uniform float nums[], uniform float result[], uniform int span)
 {
     uniform int istart = taskIndex * span;
@@ -58,17 +59,17 @@ task void sqrt_task(uniform int N, uniform float nums[], uniform float result[],
         // if input num is 0, return 0
         if (numInput != 0)
         {
-            // setup the record for last generation and current generation value
-            float numLast = guess, numCurrent, diff = 1.f;
+            // setup the record for previous generation and current generation value
+            float numPrev = guess, numCurrent, diff = 1.f;
             // judge if the accuracy is enough, 10^-4
             while (diff > accuracy)
             {
                 // apply Newton's method to calculate the sqrt value
                 // https://en.wikipedia.org/wiki/Newton%27s_method#Square_root_of_a_number
-                numCurrent = (numLast + numInput / numLast) * 0.5f;
-                diff = abs(numCurrent - numLast);
-                // put the current value as last value to prepare for next loop
-                numLast = numCurrent;
+                numCurrent = (numPrev + numInput / numPrev) * 0.5f;
+                diff = abs(numCurrent - numPrev);
+                // put the current value as previous value to prepare for next loop
+                numPrev = numCurrent;
             }
             res = numCurrent;
         }

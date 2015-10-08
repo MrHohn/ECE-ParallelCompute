@@ -29,17 +29,17 @@ void sqrt_serial(int N, float* nums, float* result)
 			continue;
 		}
 
-		// setup the record for last generation and current generation value
-		float numLast = guess, numCurrent, diff = 1;
+		// setup the record for previous generation and current generation value
+		float numPrev = guess, numCurrent, diff = 1;
 		// judge if the accuracy is enough, 10^-4 = 0.0001
 		while (diff > accuracy)
 		{
 			// apply Newton's method to calculate the sqrt value
 			// https://en.wikipedia.org/wiki/Newton%27s_method#Square_root_of_a_number
-			numCurrent = (numLast + nums[i] / numLast) * 0.5f;
-			diff = fabs(numCurrent - numLast);
-			// put the current value as last value to prepare for next loop
-			numLast = numCurrent;
+			numCurrent = (numPrev + nums[i] / numPrev) * 0.5f;
+			diff = fabs(numCurrent - numPrev);
+			// put the current value as previous value to prepare for next loop
+			numPrev = numCurrent;
 		}
 
 		result[i] = numCurrent;		
