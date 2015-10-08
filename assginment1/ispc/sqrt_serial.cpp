@@ -1,12 +1,21 @@
-#include <stdio.h>
+#include <math.h>
 
-static inline float abs_serial(float num)
-{
-	if (num < 0)
-		return -num;
-	else
-		return num; 
-}
+/*
+    Setup the initial estimation, refer wikipedia's Rough estimation:
+    https://en.wikipedia.org/wiki/Methods_of_computing_square_roots
+    
+    Suppose: 
+    sqrt(S) = sqrt(a) * 10^n
+    sqrt(S) = { 2 * 10^n, if a < 10
+                6 * 10^n, if a >= 10 }
+
+    Since for this assignment, we always calculate the sqrt of random
+    number between 0 ~ 3, thus a < 10, and n = 0
+    Hence the initial value would be set as 2 * 10^0 = 2
+*/
+const float guess = 2.f;
+// Setup the accuracy, 10^-4 = 0.0001
+const float accuracy = 0.0001f;
 
 void sqrt_serial(int N, float* nums, float* result)
 {
@@ -20,36 +29,19 @@ void sqrt_serial(int N, float* nums, float* result)
 			continue;
 		}
 
-		/*
-			Setup the initial estimation, refer wikipedia's Rough estimation:
-			https://en.wikipedia.org/wiki/Methods_of_computing_square_roots
-			
-			Suppose: 
-			sqrt(S) = sqrt(a) * 10^n
-			sqrt(S) = { 2 * 10^n, if a < 10
-			            6 * 10^n, if a >= 10 }
-
-			Since for this assignment, we always calculate the sqrt of random
-			number between 0 ~ 3, thus a < 10, and n = 0
-			Hence the initial value would be set as 2 * 10^0 = 2
-		*/
-
 		// setup the record for last generation and current generation value
-		float numLast = 2, numCurrent;
-		while (1)
+		float numLast = guess, numCurrent, diff = 1;
+		// judge if the accuracy is enough, 10^-4 = 0.0001
+		while (diff > accuracy)
 		{
 			// apply Newton's method to calculate the sqrt value
-			numCurrent = (numLast + (nums[i] / numLast)) / 2;
-			// judge if the accuracy is enough, 10^-4 = 0.0001
-			if (abs_serial(numCurrent - numLast) <= 0.0001)
-			{
-				result[i] = numCurrent;
-			    // printf("result is: %f\n", result[i]);
-				break;
-			}
+			// https://en.wikipedia.org/wiki/Newton%27s_method#Square_root_of_a_number
+			numCurrent = (numLast + (nums[i] / numLast)) * 0.5f;
+			diff = fabs(numCurrent - numLast);
 			// put the current value as last value to prepare for next loop
 			numLast = numCurrent;
 		}
+
+		result[i] = numCurrent;		
 	}
 }
-

@@ -4,6 +4,7 @@
 #include <time.h>
 #include <algorithm>
 #include <math.h>
+// Using the same time functions as the sample mandelbrot of ISPC
 #include "timing.h"
 // Include the header file that the ispc compiler generates
 #include "sqrt_ispc.h"
