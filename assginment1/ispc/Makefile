@@ -3,7 +3,7 @@ CXX=clang++
 CXXCFLAGS=-Iobjs/ -Icommon -I/usr/include/i386-linux-gnu/c++/4.7 -O3 -Wall -g -mavx
 CXXLFLAGS=-lpthread
 ISPC=ispc
-ISPCFLAGS=-O2 --arch=x86 --target=avx1-i32x8
+ISPCFLAGS=-O2 --arch=x86 --target=avx2-i32x8
 TASKSYS_SOURCE=common/tasksys.cpp
 
 default: sqrt
