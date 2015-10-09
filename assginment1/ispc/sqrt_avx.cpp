@@ -32,7 +32,7 @@ void sqrt_avx(int N, float* nums, float* result)
 		__m256 numCurrent;
 		int flag = 0;
 
-		while (flag == 0)
+		while (!flag)
 		{
 			// numCurrent = (numPrev + numInput / numPrev) * 0.5f;
 			numCurrent = _mm256_div_ps(numInput, numPrev);
