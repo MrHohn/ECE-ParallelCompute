@@ -169,10 +169,10 @@ int main()
 		sqrt_avx(totalNum, nums, result);
 		// stop timer and print out total cycles
 		double one_round = get_elapsed_mcycles();
-		printf("time of ISPC run %d:\t\t\t[%.3f] million cycles\n", i + 1, one_round);
+		printf("time of AVX run %d:\t\t\t[%.3f] million cycles\n", i + 1, one_round);
 		minAVX = min(minAVX, one_round);
 	}
-	printf("[best of sqrt_ispc_task]:\t\t[%.3f] million cycles\n", minAVX);
+	printf("[best of sqrt_avx]:\t\t\t[%.3f] million cycles\n", minAVX);
 	
 	// calculate the speedup
 	printf("\t\t\t\t\t(%.2fx speedup from AVX intrinsics)\n", minSerial / minAVX);
