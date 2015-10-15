@@ -1,9 +1,12 @@
+# check and define 32-bit or 64-bit machine
+ARCH=$(shell getconf LONG_BIT)
 
 CXX=clang++
 CXXCFLAGS=-Iobjs/ -Icommon -O2 -Wall -g -mavx
 CXXLFLAGS=-lpthread
 ISPC=ispc
-ISPCFLAGS=-O2 --arch=x86 --target=avx1-i32x8
+ISPCFLAGS_32=-O2 --arch=x86 --target=avx1-i32x8
+ISPCFLAGS_64=-O2 --arch=x86-64 --target=avx1-i32x8
 TASKSYS_SOURCE=common/tasksys.cpp
 
 default: sqrt
@@ -33,4 +36,4 @@ objs/tasksys.o: $(TASKSYS_SOURCE)
 	$(CXX) $(CXXCFLAGS) -c -o $@ $<
 
 objs/%_ispc.h objs/%_ispc.o: %.ispc
-	$(ISPC) $(ISPCFLAGS) $< -o objs/$*_ispc.o -h objs/$*_ispc.h
+	$(ISPC) $(ISPCFLAGS_$(ARCH)) $< -o objs/$*_ispc.o -h objs/$*_ispc.h
