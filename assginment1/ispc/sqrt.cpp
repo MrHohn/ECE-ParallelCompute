@@ -14,6 +14,7 @@ using namespace std;
 
 extern void sqrt_serial(int N, float* nums, float* result);
 extern void sqrt_avx(int N, float* nums, float* result);
+extern void sqrt_test_generations(int N, float* nums, float* result, int num_vector, int* total_serial, int* total_simd);
 
 // function to judge the correctness of the result
 bool check(float* exactRes, float* newRes, int len)
@@ -41,6 +42,8 @@ int main()
 {
 	// define the total iteration of testing
 	static int test_iteration = 3;
+	// define the number of vectors when do data parallelism
+	static int num_vector = 8;
 
 	// generate all the random numbers first
 	// loop for 20 millions time -> 20,000,000
@@ -53,7 +56,6 @@ int main()
 	// keep a copy of the result to check the correctness
 	float* result_exact = (float*) malloc(totalNum * sizeof(float));
 
-	printf("\n---------------------- SQRT TEST BEGIN ---------------------\n\n");
 
 	// initiallize the random seed by current time to avoid duplicate
 	srand(time(NULL));
@@ -65,7 +67,22 @@ int main()
 	    result_exact[i] = sqrt(nums[i]);
 	    result[i] = 0;
 	}
-	
+
+	printf("\n------ CALCULATE TOTAL ITERATIONS OF SERIAL AND SIMD ------\n\n");
+	int total_serial, total_simd;
+	// call the test function to calculate the total #
+	sqrt_test_generations(totalNum, nums, result, num_vector, &total_serial, &total_simd);
+	printf("total iterations of serial: \t\t%d\n", total_serial);
+	printf("total iterations of simd: \t\t%d\n", total_simd);
+	printf("\nThe theoretical speedup for SIMD is: \t%f\n\n", (float)total_serial / (float) total_simd);
+
+	printf("---------------------- SQRT TEST BEGIN ---------------------\n\n");
+	// clear the result buffer
+	for (int i = 0; i < totalNum; ++i)
+	{
+		result[i] = 0;
+	}
+
 	printf("Run the serial version first...\n");
 	double minSerial = 1e30;
 	for (int i = 0; i < test_iteration; ++i)
