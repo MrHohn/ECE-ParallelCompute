@@ -1,6 +1,6 @@
 
 CXX=clang++
-CXXCFLAGS=-Iobjs/ -Icommon -I/usr/include/i386-linux-gnu/c++/4.7 -O2 -Wall -g -mavx
+CXXCFLAGS=-Iobjs/ -Icommon -O2 -Wall -g -mavx
 CXXLFLAGS=-lpthread
 ISPC=ispc
 ISPCFLAGS=-O2 --arch=x86 --target=avx1-i32x8

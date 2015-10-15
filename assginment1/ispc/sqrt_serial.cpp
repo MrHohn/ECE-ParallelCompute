@@ -45,7 +45,7 @@ void sqrt_serial(int N, float* nums, float* result)
 
 // this method is used to test the # of iterations of all inputs
 // and we could calculate the theoretical value of speed up
-void sqrt_test_generations(int N, float* nums, float* result, int num_vector, int* total_serial, int* total_simd)
+void sqrt_test_iterations(int N, float* nums, float* result, int num_vector, int &total_serial, int &total_simd)
 {
 	// total # of serial iterations
 	int num_serial = 0;
@@ -79,12 +79,13 @@ void sqrt_test_generations(int N, float* nums, float* result, int num_vector, in
 
 		// below is for # of iterations calculation
 		temp_max = max(temp_max, cur_iteration);
-		if ((i + 1) % num_vector == 0) {
+		if ((i + 1) % num_vector == 0)
+		{
 			num_simd += temp_max;
 			temp_max = 0;
 		}
 	}
 
-	*total_serial = num_serial;
-	*total_simd = num_simd;
+	total_serial = num_serial;
+	total_simd = num_simd;
 }
