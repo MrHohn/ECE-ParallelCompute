@@ -15,15 +15,15 @@
 #################################################################################
 
 
-set( SAMPLE_NAME PrefixSum )
-set( SOURCE_FILES PrefixSum.cpp )
+set( EXECUTABLE_NAME assignment2 )
+set( SOURCE_FILES main.cpp PrefixSum_serial.cpp util.cpp)
 set( EXTRA_FILES PrefixSum_Kernels.cl )
 
 ############################################################################
 
 set(CMAKE_SUPPRESS_REGENERATION TRUE)
 cmake_minimum_required( VERSION 2.8.0 )
-project( ${SAMPLE_NAME} )
+project( ${EXECUTABLE_NAME} )
 
 if(CMAKE_BUILD_TYPE MATCHES "[Tt][Bb][Bb]")
 	return( )
@@ -70,13 +70,13 @@ endif()
 # Find OpenCL include and libs
 find_path( OPENCL_INCLUDE_DIRS 
     NAMES OpenCL/cl.h CL/cl.h
-    HINTS ../../../../../include/ $ENV{AMDAPPSDKROOT}/include/
+    HINTS $ENV{AMDAPPSDKROOT}/include/
 )
 mark_as_advanced(OPENCL_INCLUDE_DIRS)
 
 find_library( OPENCL_LIBRARIES
 	NAMES OpenCL
-	HINTS ../../../../../lib/ $ENV{AMDAPPSDKROOT}/lib
+	HINTS $ENV{AMDAPPSDKROOT}/lib
 	PATH_SUFFIXES ${PLATFORM}${BITNESS} ${BITNESS_SUFFIX}
 )
 mark_as_advanced( OPENCL_LIBRARIES )
@@ -109,9 +109,9 @@ set( LINKER_FLAGS " " )
 set( ADDITIONAL_LIBRARIES "" )
 
 file(GLOB INCLUDE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/*.h" )
-include_directories( ${OPENCL_INCLUDE_DIRS} ../../../../../include/SDKUtil $ENV{AMDAPPSDKROOT}/include/SDKUtil )
+include_directories( ${OPENCL_INCLUDE_DIRS} $ENV{AMDAPPSDKROOT}/include/SDKUtil )
 
-add_executable( ${SAMPLE_NAME} ${SOURCE_FILES} ${INCLUDE_FILES} ${EXTRA_FILES})
+add_executable( ${EXECUTABLE_NAME} ${SOURCE_FILES} ${INCLUDE_FILES} ${EXTRA_FILES})
 
 # gcc/g++ specific compile options
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
@@ -145,11 +145,11 @@ elseif( MSVC )
     set( ADDITIONAL_LIBRARIES ${ADDITIONAL_LIBRARIES} ${EXTRA_LIBRARIES_MSVC} )
 endif( )
 
-set_target_properties( ${SAMPLE_NAME} PROPERTIES
+set_target_properties( ${EXECUTABLE_NAME} PROPERTIES
                         COMPILE_FLAGS ${COMPILER_FLAGS}
                         LINK_FLAGS ${LINKER_FLAGS}
                      )
-target_link_libraries( ${SAMPLE_NAME} ${OPENCL_LIBRARIES} ${ADDITIONAL_LIBRARIES} )
+target_link_libraries( ${EXECUTABLE_NAME} ${OPENCL_LIBRARIES} ${ADDITIONAL_LIBRARIES} )
 
 # Set output directory to bin
 if( MSVC )
@@ -161,7 +161,7 @@ endif()
 # Copy extra files to binary directory
 foreach( extra_file ${EXTRA_FILES} )
     add_custom_command(
-        TARGET ${SAMPLE_NAME} POST_BUILD
+        TARGET ${EXECUTABLE_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
         ${CMAKE_CURRENT_SOURCE_DIR}/${extra_file}  ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -171,5 +171,5 @@ endforeach( extra_file )
 
 # Group sample based on FOLDER_GROUP defined in parent folder
 if( FOLDER_GROUP )
-    set_target_properties(${SAMPLE_NAME} PROPERTIES FOLDER ${FOLDER_GROUP})
+    set_target_properties(${EXECUTABLE_NAME} PROPERTIES FOLDER ${FOLDER_GROUP})
 endif( )
