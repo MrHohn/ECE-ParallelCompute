@@ -67,7 +67,7 @@ int main(int argc, char * argv[])
         // start to record time consumption
         reset_and_start_timer();
         // call the sqrt_serial function to calculate all the inputs
-        exclusive_scan_serial(input, len, outputB);
+        exclusive_scan_serial(outputC, len, outputB);
         // stop timer and print out total cycles
         double one_round = get_elapsed_mcycles();
         printf("time of serial run %d:\t\t\t[%.3f] million cycles\n", i + 1, one_round);
