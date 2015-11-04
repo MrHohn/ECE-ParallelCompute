@@ -11,7 +11,7 @@ int randNum(int rMin, int rMax)
 
 void createRand(int* input, int N, int rMin, int rMax)
 {
-	srand(time(NULL));
+	srand((unsigned int)time(NULL));
     for (int i = 0; i < N; ++i)
     {
         *input = randNum(rMin, rMax);
@@ -31,5 +31,14 @@ int roundPowerTwo(int len)
 
 bool checkCorrect(int* answer, int* result, int len)
 {
+	for (int i = 0; i < len; ++i)
+	{
+		if (*answer != *result)
+		{
+			return false;
+		}
+		++answer;
+		++result;
+	}
 	return true;
 }

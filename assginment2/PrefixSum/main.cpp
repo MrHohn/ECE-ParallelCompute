@@ -124,12 +124,6 @@ int main(int argc, char* argv[])
     // else
     //     printf("\t\tOutput incorrect!\n\n");
 
-    // printf("output: %d\n", repeat_count);
-    // for (int i = 0; i < repeat_count; ++i)
-    // {
-    //     printf("%d\n", output[i]);
-    // }
-
     printf("\n-------------------------- TEST END --------------------------\n\n");
 
     delete[] input;
