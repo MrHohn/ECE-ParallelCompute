@@ -158,10 +158,10 @@ int main(int argc, char* argv[])
     for (int i = 0; i < test_iteration; ++i)
     {
         // flush the output buffer
-        flushBuffer(outputBAnswer, len);
+        flushBuffer(outputBResult, len);
         // start to record time consumption
         reset_and_start_timer();
-        exclusive_scan_parallel(outputCAnswer, len, outputBAnswer);
+        exclusive_scan_parallel(outputCAnswer, len, outputBResult);
         // stop timer and print out total cycles
         double one_round = get_elapsed_mcycles();
         printf("*time of parallel run %d:\t\t[%.3f] million cycles\n", i + 1, one_round);
@@ -172,7 +172,7 @@ int main(int argc, char* argv[])
 
     // now check the result
     printf("Now check the correctness...");
-    if (true)
+    if (checkCorrect(outputBAnswer, outputBResult, len))
         printf("\t\tOutput correct!\n");
     else
         printf("\t\tOutput incorrect!\n");
