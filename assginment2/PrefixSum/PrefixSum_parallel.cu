@@ -72,8 +72,6 @@ void exclusive_scan_parallel(int* nums, int len, int* output, double& time_cost)
     // free device memory
     cudaFree(device_result);
     cudaFree(device_input);
-
-    return 0;
 }
 
 void printCudaInfo()

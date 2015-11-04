@@ -11,7 +11,7 @@
 using namespace std;
 
 void exclusive_scan_serial(int* nums, int len, int* output);
-double exclusive_scan_parallel(int* nums, int len, int* output);
+void exclusive_scan_parallel(int* nums, int len, int* output, double& time_cost);
 int find_repeats_serial(int* nums, int len, int* outputB, int* outputC);
 
 int main(int argc, char* argv[])
@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
         // flush the output buffer
         flushBuffer(outputBResult, len);
         double one_round;
-        exclusive_scan_parallel(outputCAnswer, len, outputBResult, &one_round);
+        exclusive_scan_parallel(outputCAnswer, len, outputBResult, one_round);
         printf("*time of parallel run %d:\t\t[%.3f] million cycles\n", i + 1, one_round);
         minParallelScan = min(minParallelScan, one_round);
     }
