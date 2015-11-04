@@ -13,6 +13,7 @@ using namespace std;
 void exclusive_scan_serial(int* nums, int len, int* output);
 void exclusive_scan_parallel(int* nums, int len, int* output, double& time_cost);
 int find_repeats_serial(int* nums, int len, int* outputB, int* outputC);
+int find_repeats_parallel(int* nums, int len, int* outputB, int* outputC, double& time_cost);
 
 int main(int argc, char* argv[])
 {
@@ -108,16 +109,14 @@ int main(int argc, char* argv[])
 
     printf("\nNow run the [parallel find repeats]...\n");
     double minParallelFind = 1e30;
+    int repeat_count_GPU;
     for (int i = 0; i < test_iteration; ++i)
     {
         // flush the output buffer
-        flushBuffer(outputBAnswer, len);
-        flushBuffer(outputCAnswer, len);
-        // start to record time consumption
-        reset_and_start_timer();
-        repeat_count = find_repeats_serial(input, N, outputBAnswer, outputCAnswer);
-        // stop timer and print out total cycles
-        double one_round = get_elapsed_mcycles();
+        flushBuffer(outputBResult, len);
+        flushBuffer(outputCResult, len);
+        double one_round;
+        repeat_count_GPU = find_repeats_serial(input, N, outputBResult, outputCResult, one_round);
         printf("*time of parallel run %d:\t\t[%.3f] million cycles\n", i + 1, one_round);
         minParallelFind = min(minParallelFind, one_round);
     }
@@ -160,7 +159,7 @@ int main(int argc, char* argv[])
         // flush the output buffer
         flushBuffer(outputBResult, len);
         double one_round;
-        exclusive_scan_parallel(outputCAnswer, len, outputBResult, one_round);
+        exclusive_scan_parallel(outputCAnswer, N, outputBResult, one_round);
         printf("*time of parallel run %d:\t\t[%.3f] million cycles\n", i + 1, one_round);
         minParallelScan = min(minParallelScan, one_round);
     }
@@ -169,7 +168,7 @@ int main(int argc, char* argv[])
 
     // now check the result
     printf("Now check the correctness...");
-    if (checkCorrect(outputBAnswer, outputBResult, len))
+    if (checkCorrect(outputBAnswer, outputBResult, N))
         printf("\t\tOutput correct!\n");
     else
         printf("\t\tOutput incorrect!\n");
