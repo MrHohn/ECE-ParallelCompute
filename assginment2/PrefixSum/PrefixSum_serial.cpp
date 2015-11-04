@@ -58,6 +58,7 @@ int find_repeats_serial(int* nums, int len, int* outputB, int* outputC)
             ++unique_count;
         }
     }
+    // check the last bit
     if (nums[len - 1] != nums[len - 2])
     {
         outputC[unique_count] = nums[len - 1];

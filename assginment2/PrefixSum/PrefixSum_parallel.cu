@@ -111,19 +111,19 @@ __global__ void setRepeat(int* device_input, int* device_outputBTemp, int* devic
 __global__ void getRepeat(int* nums, int* device_outputB, int* device_outputC, int* device_outputBTemp, int* device_outputCTemp, int len)
 {
     int index = blockIdx.x * blockDim.x + threadIdx.x;
-    // check last bit
-    if (index + 1 == len)
-    {
-        int curC = device_outputCTemp[index];
-        if (curC != device_outputCTemp[index - 1])
-        {
-            device_outputC[curC] = nums[index];
-        }
-        return;
-    }
     // return if out of range
-    if (index + 1 > len)
+    if (index + 1 >= len)
     {
+        // check last bit
+        if (index + 1 == len)
+        {
+            int curC = device_outputCTemp[index];
+            if (curC != device_outputCTemp[index - 1])
+            {
+                device_outputC[curC] = nums[index];
+            }
+            return;
+        }
         return;
     }
 

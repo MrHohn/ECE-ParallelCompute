@@ -2,13 +2,9 @@ EXECUTABLE := PrefixSum
 
 CU_FILES   := PrefixSum_parallel.cu
 
-CU_DEPS    :=
-
 CC_FILES   := main.cpp PrefixSum_serial.cpp util.cpp
 
 all: $(EXECUTABLE) $(REFERENCE)
-
-LOGS	   := logs
 
 ###########################################################
 

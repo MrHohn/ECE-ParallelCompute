@@ -18,6 +18,8 @@ int find_repeats_parallel(int* nums, int len, int* outputB, int* outputC, double
 int main(int argc, char* argv[])
 {
     static int test_iteration = 3;
+    // define output stream
+    ofstream outputFile;
 
     int N, len; // N is the actual input length, might be rounded to len
     string line;
@@ -72,13 +74,16 @@ int main(int argc, char* argv[])
             printf("Exit now...\n");
             exit(0);
         }
-    }
 
-    // printf("input:\n");
-    // for (int i = 0; i < N; ++i)
-    // {
-    //     printf("%d\n", input[i]);
-    // }
+        // open a new file for output
+        outputFile.open ("sampleoutput");
+        outputFile << "input sample array:\n";
+        for (int i = 0; i < N; ++i)
+        {
+            outputFile << input[i] << " ";
+        }
+        outputFile << "\n\n";
+    }
 
     int* outputBAnswer = new int[len];
     int* outputCAnswer = new int[len];
@@ -132,6 +137,27 @@ int main(int argc, char* argv[])
     else
         printf("\t\tOutput incorrect!\n");
 
+    // write out the result if use sample file
+    if (argc >= 1)
+    {
+        outputFile << "number of entries in array B:\n";
+        outputFile << repeat_count << "\n\n";
+
+        outputFile << "array B for find_repeats:\n";
+        for (int i = 0; i < repeat_count; ++i)
+        {
+            outputFile << outputBAnswer[i] << " ";
+        }
+        outputFile << "\n\n";
+
+        outputFile << "array C for find_repeats:\n";
+        for (int i = 0; i < N - repeat_count; ++i)
+        {
+            outputFile << outputCAnswer[i] << " ";
+        }
+        outputFile << "\n\n";
+    }
+
     printf("\n-------------------- EXCLUSIVE SCAN SECTION -------------------\n\n");
 
     printf("First run the [serial exclusive scan]...\n");
@@ -176,6 +202,18 @@ int main(int argc, char* argv[])
         printf("\t\tOutput incorrect!\n");
 
     printf("\n-------------------------- TEST END --------------------------\n\n");
+
+    // write out the result if use sample file
+    if (argc >= 1)
+    {
+        outputFile << "exclusive_scan of array C:\n";
+        for (int i = 0; i < unique_count; ++i)
+        {
+            outputFile << outputBAnswer[i] << " ";
+        }
+        outputFile << "\n";
+        outputFile.close();
+    }
 
     delete[] input;
     delete[] outputBAnswer;
