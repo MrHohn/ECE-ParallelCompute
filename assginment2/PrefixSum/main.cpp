@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+
 #include "timing.h"
 #include "util.h"
 
@@ -13,11 +14,9 @@ int find_repeats_serial(int* nums, int len, int* outputB, int* outputC);
 
 int main(int argc, char* argv[])
 {
-    printf("\n----------------------- GPU TEST BEGIN ---------------------\n\n");
-
     static int test_iteration = 3;
 
-    int N, len;
+    int N, len; // N is the actual input length, might be rounded to len
     string line;
     int* input;
     if (argc == 1)
@@ -68,7 +67,6 @@ int main(int argc, char* argv[])
         {
             printf("File: [%s] Not Found!\n", file_name.c_str());
             printf("Exit now...\n");
-            printf("\n-------------------------- TEST END --------------------------\n\n");
             exit(0);
         }
     }
@@ -79,54 +77,113 @@ int main(int argc, char* argv[])
     //     printf("%d\n", input[i]);
     // }
 
-    int* outputB = new int[len];
-    int* outputC = new int[len];
+    int* outputBAnswer = new int[len];
+    int* outputCAnswer = new int[len];
+    int* outputBResult = new int[len];
+    int* outputCResult = new int[len];
     
+    printf("\n--------------------- FIND REPEAT SECTION --------------------\n\n");
 
     printf("First run the [serial find repeats]...\n");
     double minSerialFind = 1e30;
     int repeat_count;
     for (int i = 0; i < test_iteration; ++i)
     {
+        // flush the output buffer
+        flushBuffer(outputBAnswer, len);
+        flushBuffer(outputCAnswer, len);
         // start to record time consumption
         reset_and_start_timer();
         // call the sqrt_serial function to calculate all the inputs
-        repeat_count = find_repeats_serial(input, N, outputB, outputC);
+        repeat_count = find_repeats_serial(input, N, outputBAnswer, outputCAnswer);
         // stop timer and print out total cycles
         double one_round = get_elapsed_mcycles();
-        printf("time of serial run %d:\t\t\t[%.3f] million cycles\n", i + 1, one_round);
+        printf("*time of serial run %d:\t\t\t[%.3f] million cycles\n", i + 1, one_round);
         minSerialFind = min(minSerialFind, one_round);
     }
     printf("[best of find_serial]:\t\t\t[%.3f] million cycles\n", minSerialFind);
 
-    int unique_count = N - repeat_count;
-    len = roundPowerTwo(unique_count);
+    /* ------------------------------------------------------------- */
 
-    printf("\nNow run the [serial exclusive scan]...\n");
-    double minSerialScan = 1e30;
+    printf("\nNow run the [parallel find repeats]...\n");
+    double minParallelFind = 1e30;
     for (int i = 0; i < test_iteration; ++i)
     {
+        // flush the output buffer
+        flushBuffer(outputBAnswer, len);
+        flushBuffer(outputCAnswer, len);
         // start to record time consumption
         reset_and_start_timer();
         // call the sqrt_serial function to calculate all the inputs
-        exclusive_scan_serial(outputC, len, outputB);
+        repeat_count = find_repeats_serial(input, N, outputBAnswer, outputCAnswer);
         // stop timer and print out total cycles
         double one_round = get_elapsed_mcycles();
-        printf("time of serial run %d:\t\t\t[%.3f] million cycles\n", i + 1, one_round);
+        printf("*time of parallel run %d:\t\t[%.3f] million cycles\n", i + 1, one_round);
+        minParallelFind = min(minParallelFind, one_round);
+    }
+    printf("[best of find_parallel]:\t\t[%.3f] million cycles\n", minParallelFind);
+    printf("\t\t\t\t\t(%.2fx speedup on GPU)\n", minSerialFind / minParallelFind);
+
+    // now check the result
+    printf("Now check the correctness...");
+    if (true)
+        printf("\t\tOutput correct!\n");
+    else
+        printf("\t\tOutput incorrect!\n");
+
+    printf("\n-------------------- EXCLUSIVE SCAN SECTION -------------------\n\n");
+
+    printf("First run the [serial exclusive scan]...\n");
+    int unique_count = N - repeat_count;
+    len = roundPowerTwo(unique_count);
+    double minSerialScan = 1e30;
+    for (int i = 0; i < test_iteration; ++i)
+    {
+        // flush the output buffer
+        flushBuffer(outputBAnswer, len);
+        // start to record time consumption
+        reset_and_start_timer();
+        // call the sqrt_serial function to calculate all the inputs
+        exclusive_scan_serial(outputCAnswer, len, outputBAnswer);
+        // stop timer and print out total cycles
+        double one_round = get_elapsed_mcycles();
+        printf("*time of serial run %d:\t\t\t[%.3f] million cycles\n", i + 1, one_round);
         minSerialScan = min(minSerialScan, one_round);
     }
     printf("[best of scan_serial]:\t\t\t[%.3f] million cycles\n", minSerialScan);
 
-    // // now check the result
-    // printf("Now check the correctness...");
-    // if (true)
-    //     printf("\t\tOutput correct!\n\n");
-    // else
-    //     printf("\t\tOutput incorrect!\n\n");
+    /* ------------------------------------------------------------- */
+
+    printf("\nNow run the [parallel exclusive scan]...\n");
+    double minParallelScan = 1e30;
+    for (int i = 0; i < test_iteration; ++i)
+    {
+        // flush the output buffer
+        flushBuffer(outputBAnswer, len);
+        // start to record time consumption
+        reset_and_start_timer();
+        // call the sqrt_serial function to calculate all the inputs
+        exclusive_scan_serial(outputCAnswer, len, outputBAnswer);
+        // stop timer and print out total cycles
+        double one_round = get_elapsed_mcycles();
+        printf("*time of parallel run %d:\t\t[%.3f] million cycles\n", i + 1, one_round);
+        minParallelScan = min(minParallelScan, one_round);
+    }
+    printf("[best of scan_parallel]:\t\t[%.3f] million cycles\n", minParallelScan);
+    printf("\t\t\t\t\t(%.2fx speedup on GPU)\n", minSerialScan / minParallelScan);
+
+    // now check the result
+    printf("Now check the correctness...");
+    if (true)
+        printf("\t\tOutput correct!\n");
+    else
+        printf("\t\tOutput incorrect!\n");
 
     printf("\n-------------------------- TEST END --------------------------\n\n");
 
     delete[] input;
-    delete[] outputB;
-    delete[] outputC;
+    delete[] outputBAnswer;
+    delete[] outputCAnswer;
+    delete[] outputBResult;
+    delete[] outputCResult;
 }

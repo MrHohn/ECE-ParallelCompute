@@ -33,12 +33,18 @@ bool checkCorrect(int* answer, int* result, int len)
 {
 	for (int i = 0; i < len; ++i)
 	{
-		if (*answer != *result)
+		if (answer[i] != result[i])
 		{
 			return false;
 		}
-		++answer;
-		++result;
 	}
 	return true;
+}
+
+void flushBuffer(int* buffer, int len)
+{
+	for (int i = 0; i < len; ++i)
+	{
+		buffer[i] = 0;
+	}
 }
