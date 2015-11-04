@@ -125,7 +125,9 @@ int main(int argc, char* argv[])
 
     // now check the result
     printf("Now check the correctness...");
-    if (true)
+    bool correctB = checkCorrect(outputBAnswer, outputBResult, repeat_count);
+    bool correctC = checkCorrect(outputCAnswer, outputCResult, N - repeat_count);
+    if (repeat_count_GPU == repeat_count && correctB && correctC)
         printf("\t\tOutput correct!\n");
     else
         printf("\t\tOutput incorrect!\n");
@@ -159,7 +161,7 @@ int main(int argc, char* argv[])
         // flush the output buffer
         flushBuffer(outputBResult, len);
         double one_round = 1e30;
-        exclusive_scan_parallel(outputCAnswer, N, outputBResult, one_round);
+        exclusive_scan_parallel(outputCAnswer, unique_count, outputBResult, one_round);
         printf("*time of parallel run %d:\t\t[%.3f] million cycles\n", i + 1, one_round);
         minParallelScan = min(minParallelScan, one_round);
     }
@@ -168,7 +170,7 @@ int main(int argc, char* argv[])
 
     // now check the result
     printf("Now check the correctness...");
-    if (checkCorrect(outputBAnswer, outputBResult, N))
+    if (checkCorrect(outputBAnswer, outputBResult, unique_count))
         printf("\t\tOutput correct!\n");
     else
         printf("\t\tOutput incorrect!\n");
