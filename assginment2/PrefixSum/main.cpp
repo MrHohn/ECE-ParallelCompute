@@ -115,8 +115,8 @@ int main(int argc, char* argv[])
         // flush the output buffer
         flushBuffer(outputBResult, len);
         flushBuffer(outputCResult, len);
-        double one_round;
-        repeat_count_GPU = find_repeats_serial(input, N, outputBResult, outputCResult, one_round);
+        double one_round = 1e30;
+        repeat_count_GPU = find_repeats_parallel(input, N, outputBResult, outputCResult, one_round);
         printf("*time of parallel run %d:\t\t[%.3f] million cycles\n", i + 1, one_round);
         minParallelFind = min(minParallelFind, one_round);
     }
@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
     {
         // flush the output buffer
         flushBuffer(outputBResult, len);
-        double one_round;
+        double one_round = 1e30;
         exclusive_scan_parallel(outputCAnswer, N, outputBResult, one_round);
         printf("*time of parallel run %d:\t\t[%.3f] million cycles\n", i + 1, one_round);
         minParallelScan = min(minParallelScan, one_round);

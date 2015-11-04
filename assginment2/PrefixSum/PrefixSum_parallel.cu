@@ -108,7 +108,7 @@ __global__ void setRepeat(int* device_input, int* device_outputBTemp, int* devic
     }
 }
 
-__global__ void getRepeat(int* nums, int* device_outputBTemp, int* device_outputCTemp, int* device_outputB, int* device_outputC, int len)
+__global__ void getRepeat(int* nums, int* device_outputB, int* device_outputC, int* device_outputBTemp, int* device_outputCTemp, int len)
 {
     int index = blockIdx.x * blockDim.x + threadIdx.x;
     // return if out of range
@@ -133,7 +133,7 @@ int launch_find(int len, int roundedLen, int* device_input, int* device_outputB,
 {
     // call setRepeat function first
     int numBlocks = (len + threadsPerBlock - 1) / threadsPerBlock;
-    setRepeat<<<numBlocks, threadsPerBlock>>>(device_input, device_outputB, device_outputC, len);
+    setRepeat<<<numBlocks, threadsPerBlock>>>(device_input, device_outputBTemp, device_outputCTemp, len);
 
     // call exclusive scan again to add up previous output
     launch_scan(roundedLen, device_outputBTemp, threadsPerBlock);
@@ -153,7 +153,9 @@ int find_repeats_parallel(int* nums, int len, int* outputB, int* outputC, double
 {
     int* device_input;
     int* device_outputB;
+    int* device_outputBTemp;
     int* device_outputC;
+    int* device_outputCTemp;
 
     int roundedLen = roundPowerTwo(len);
 
@@ -183,6 +185,8 @@ int find_repeats_parallel(int* nums, int len, int* outputB, int* outputC, double
     cudaFree(device_input);
     cudaFree(device_outputB);
     cudaFree(device_outputC);
+    cudaFree(device_outputBTemp);
+    cudaFree(device_outputCTemp);
 
     return repeat_count;
 }
