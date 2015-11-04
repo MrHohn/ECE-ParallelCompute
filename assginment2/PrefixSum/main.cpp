@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <cstring>
 
 #include "timing.h"
 #include "util.h"
@@ -10,6 +11,7 @@
 using namespace std;
 
 void exclusive_scan_serial(int* nums, int len, int* output);
+double exclusive_scan_parallel(int* nums, int len, int* output);
 int find_repeats_serial(int* nums, int len, int* outputB, int* outputC);
 
 int main(int argc, char* argv[])
@@ -159,7 +161,7 @@ int main(int argc, char* argv[])
         flushBuffer(outputBAnswer, len);
         // start to record time consumption
         reset_and_start_timer();
-        exclusive_scan_serial(outputCAnswer, len, outputBAnswer);
+        exclusive_scan_parallel(outputCAnswer, len, outputBAnswer);
         // stop timer and print out total cycles
         double one_round = get_elapsed_mcycles();
         printf("*time of parallel run %d:\t\t[%.3f] million cycles\n", i + 1, one_round);

@@ -25,9 +25,9 @@ __global__ void downSweep(int* device_result, int length, int twod, int twod1) {
     device_result[index + twod1 - 1] += tmp;
 }
 
-void exclusive_scan(int* device_start, int length, int* device_result)
+void exclusive_scan(int* device_start, int len, int* device_result)
 {
-    const int roundUpLength = roundPowerTwo(length);
+    const int roundUpLength = roundPowerTwo(len);
     int threadsPerBlock = 256;
     
     // upsweep phase
@@ -51,35 +51,35 @@ void exclusive_scan(int* device_start, int length, int* device_result)
     }
 }
 
-double cudaScan(int* inarray, int* end, int* resultarray)
+double exclusive_scan_parallel(int* nums, int len, int* output)
 {
     int* device_result;
     int* device_input;
 
-    int rounded_length = roundPowerTwo(end - inarray);
-    cudaMalloc((void **)&device_result, sizeof(int) * rounded_length);
-    cudaMalloc((void **)&device_input, sizeof(int) * rounded_length);
-    cudaMemcpy(device_input, inarray, (end - inarray) * sizeof(int), 
-               cudaMemcpyHostToDevice);
+    int roundedLen = roundPowerTwo(len);
 
-    cudaMemcpy(device_result, inarray, (end - inarray) * sizeof(int), 
+    cudaMalloc((void **)&device_result, roundedLen * sizeof(int));
+    cudaMalloc((void **)&device_input, roundedLen * sizeof(int));
+    cudaMemcpy(device_input, nums, len * sizeof(int), 
+               cudaMemcpyHostToDevice);
+    cudaMemcpy(device_result, nums, len * sizeof(int), 
                cudaMemcpyHostToDevice);
 
     // double startTime = CycleTimer::currentSeconds();
 
-    exclusive_scan(device_input, end - inarray, device_result);
+    exclusive_scan(device_input, len, device_result);
 
     // Wait for any work left over to be completed.
     cudaThreadSynchronize();
     // double endTime = CycleTimer::currentSeconds();
     // double overallDuration = endTime - startTime;
     
-    cudaMemcpy(resultarray, device_result, (end - inarray) * sizeof(int),
+    cudaMemcpy(output, device_result, len * sizeof(int),
                cudaMemcpyDeviceToHost);
     // free device memory
     cudaFree(device_result);
     cudaFree(device_input);
-    
+
     return 0;
 }
 
