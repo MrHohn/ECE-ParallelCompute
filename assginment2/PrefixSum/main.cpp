@@ -94,7 +94,6 @@ int main(int argc, char* argv[])
         flushBuffer(outputCAnswer, len);
         // start to record time consumption
         reset_and_start_timer();
-        // call the sqrt_serial function to calculate all the inputs
         repeat_count = find_repeats_serial(input, N, outputBAnswer, outputCAnswer);
         // stop timer and print out total cycles
         double one_round = get_elapsed_mcycles();
@@ -114,7 +113,6 @@ int main(int argc, char* argv[])
         flushBuffer(outputCAnswer, len);
         // start to record time consumption
         reset_and_start_timer();
-        // call the sqrt_serial function to calculate all the inputs
         repeat_count = find_repeats_serial(input, N, outputBAnswer, outputCAnswer);
         // stop timer and print out total cycles
         double one_round = get_elapsed_mcycles();
@@ -143,7 +141,6 @@ int main(int argc, char* argv[])
         flushBuffer(outputBAnswer, len);
         // start to record time consumption
         reset_and_start_timer();
-        // call the sqrt_serial function to calculate all the inputs
         exclusive_scan_serial(outputCAnswer, len, outputBAnswer);
         // stop timer and print out total cycles
         double one_round = get_elapsed_mcycles();
@@ -162,7 +159,6 @@ int main(int argc, char* argv[])
         flushBuffer(outputBAnswer, len);
         // start to record time consumption
         reset_and_start_timer();
-        // call the sqrt_serial function to calculate all the inputs
         exclusive_scan_serial(outputCAnswer, len, outputBAnswer);
         // stop timer and print out total cycles
         double one_round = get_elapsed_mcycles();

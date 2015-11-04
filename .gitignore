@@ -2,7 +2,7 @@
 *.o
 assginment2/PrefixSum/bin
 assginment2/PrefixSum/CMakeFiles
-assginment2/PrefixSum/Makefile
 assginment2/PrefixSum/CMakeCache.txt
 assginment2/PrefixSum/cmake_install.cmake
 assginment2/PrefixSum/build
+assginment2/PrefixSum/obj
