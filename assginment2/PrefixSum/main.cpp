@@ -159,11 +159,8 @@ int main(int argc, char* argv[])
     {
         // flush the output buffer
         flushBuffer(outputBResult, len);
-        // start to record time consumption
-        reset_and_start_timer();
-        exclusive_scan_parallel(outputCAnswer, len, outputBResult);
-        // stop timer and print out total cycles
-        double one_round = get_elapsed_mcycles();
+        double one_round;
+        exclusive_scan_parallel(outputCAnswer, len, outputBResult, &one_round);
         printf("*time of parallel run %d:\t\t[%.3f] million cycles\n", i + 1, one_round);
         minParallelScan = min(minParallelScan, one_round);
     }

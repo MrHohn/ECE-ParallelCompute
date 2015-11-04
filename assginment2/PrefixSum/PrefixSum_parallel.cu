@@ -25,7 +25,7 @@ __global__ void downSweep(int* device_result, int length, int twod, int twod1) {
     device_result[index + twod1 - 1] += tmp;
 }
 
-double exclusive_scan_parallel(int* nums, int len, int* output)
+void exclusive_scan_parallel(int* nums, int len, int* output, double& time_cost)
 {
     int* device_result;
     int* device_input;
@@ -35,13 +35,11 @@ double exclusive_scan_parallel(int* nums, int len, int* output)
     // allocate space on GPU and copy inputs into it
     cudaMalloc((void **)&device_result, roundedLen * sizeof(int));
     cudaMalloc((void **)&device_input, roundedLen * sizeof(int));
-    cudaMemcpy(device_input, nums, len * sizeof(int), 
-               cudaMemcpyHostToDevice);
-    cudaMemcpy(device_result, nums, len * sizeof(int), 
-               cudaMemcpyHostToDevice);
+    cudaMemcpy(device_input, nums, len * sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(device_result, nums, len * sizeof(int), cudaMemcpyHostToDevice);
 
-    // double startTime = CycleTimer::currentSeconds();
     // start to do GPU computing
+    reset_and_start_timer();
 
     int threadsPerBlock = 256;
     
@@ -67,12 +65,10 @@ double exclusive_scan_parallel(int* nums, int len, int* output)
     cudaThreadSynchronize();
 
     // finished GPU computing
-    // double endTime = CycleTimer::currentSeconds();
-    // double overallDuration = endTime - startTime;
+    time_cost = get_elapsed_mcycles();
     
     // copy back the result
-    cudaMemcpy(output, device_result, len * sizeof(int),
-               cudaMemcpyDeviceToHost);
+    cudaMemcpy(output, device_result, len * sizeof(int), cudaMemcpyDeviceToHost);
     // free device memory
     cudaFree(device_result);
     cudaFree(device_input);
