@@ -4,7 +4,7 @@
 #include <fstream>
 #include <string>
 #include "timing.h"
-#include "util.hpp"
+#include "util.h"
 
 using namespace std;
 

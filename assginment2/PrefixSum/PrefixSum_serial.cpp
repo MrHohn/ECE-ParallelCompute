@@ -1,16 +1,18 @@
 #include <cstring>
 
+// this method is cited from CMU's assignment description
+// http://15418.courses.cs.cmu.edu/spring2015/article/4
 void exclusive_scan_serial(int* nums, int len, int* output)
 {
     memmove(output, nums, len * sizeof(int));
     // upsweep phase.
     // total work O(n) -> n/2 + n/4 + n/8 + ... + 2
-    for (int twod = 1; twod < len; twod *= 2)
+    for (int starter = 1; starter < len; starter *= 2)
     {
-        int twod1 = twod * 2;
-        for (int i = 0; i < len; i += twod1)
+        int interval = starter * 2;
+        for (int i = 0; i < len; i += interval)
         {
-            output[i + twod1 - 1] += output[i + twod - 1];
+            output[i + interval - 1] += output[i + starter - 1];
         }
     }
 
@@ -18,14 +20,14 @@ void exclusive_scan_serial(int* nums, int len, int* output)
 
     // downsweep phase.
     // total work O(n) -> 1 + 2 + 4 + ... + n/2
-    for (int twod = len / 2; twod >= 1; twod /= 2)
+    for (int starter = len / 2; starter >= 1; starter /= 2)
     {
-        int twod1 = twod * 2;
-        for (int i = 0; i < len; i += twod1)
+        int interval = starter * 2;
+        for (int i = 0; i < len; i += interval)
         {
-            int t = output[i + twod - 1];
-            output[i + twod - 1] = output[i + twod1 - 1];
-            output[i + twod1 - 1] += t; // change twod1 to twod to reverse prefix sum.
+            int temp = output[i + starter - 1];
+            output[i + starter - 1] = output[i + interval - 1];
+            output[i + interval - 1] += temp; // change interval to starter to reverse prefix sum.
         }
     }
 }
