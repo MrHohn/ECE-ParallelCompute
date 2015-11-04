@@ -25,32 +25,6 @@ __global__ void downSweep(int* device_result, int length, int twod, int twod1) {
     device_result[index + twod1 - 1] += tmp;
 }
 
-void exclusive_scan(int* device_start, int len, int* device_result)
-{
-    const int roundUpLength = roundPowerTwo(len);
-    int threadsPerBlock = 256;
-    
-    // upsweep phase
-    for (int twod = 1; twod < roundUpLength; twod *= 2) {
-        int twod1 = twod * 2;
-        int blocksPerGrid 
-            = (roundUpLength/twod1 + threadsPerBlock - 1) / threadsPerBlock;
-        upSweep<<<blocksPerGrid, threadsPerBlock>>>(device_result, roundUpLength, twod, twod1);
-    }
-
-    // set last element to zero
-    int zero = 0;
-    cudaMemcpy(&device_result[roundUpLength - 1], &zero, sizeof(int), cudaMemcpyHostToDevice);
-
-    // downsweep phase
-    for (int twod = roundUpLength / 2; twod >= 1; twod /= 2) {
-        int twod1 = twod * 2;
-        int blocksPerGrid 
-            = (roundUpLength/twod1 + threadsPerBlock - 1) / threadsPerBlock;
-        downSweep<<<blocksPerGrid, threadsPerBlock>>>(device_result, roundUpLength, twod, twod1);
-    }
-}
-
 double exclusive_scan_parallel(int* nums, int len, int* output)
 {
     int* device_result;
@@ -58,6 +32,7 @@ double exclusive_scan_parallel(int* nums, int len, int* output)
 
     int roundedLen = roundPowerTwo(len);
 
+    // allocate space on GPU and copy inputs into it
     cudaMalloc((void **)&device_result, roundedLen * sizeof(int));
     cudaMalloc((void **)&device_input, roundedLen * sizeof(int));
     cudaMemcpy(device_input, nums, len * sizeof(int), 
@@ -66,14 +41,36 @@ double exclusive_scan_parallel(int* nums, int len, int* output)
                cudaMemcpyHostToDevice);
 
     // double startTime = CycleTimer::currentSeconds();
+    // start to do GPU computing
 
-    exclusive_scan(device_input, len, device_result);
+    int threadsPerBlock = 256;
+    
+    // upsweep phase
+    for (int twod = 1; twod < roundedLen; twod *= 2) {
+        int twod1 = twod * 2;
+        int blocksPerGrid = (roundedLen/twod1 + threadsPerBlock - 1) / threadsPerBlock;
+        upSweep<<<blocksPerGrid, threadsPerBlock>>>(device_result, roundedLen, twod, twod1);
+    }
+
+    // set last element to zero
+    int zero = 0;
+    cudaMemcpy(&device_result[roundedLen - 1], &zero, sizeof(int), cudaMemcpyHostToDevice);
+
+    // downsweep phase
+    for (int twod = roundedLen / 2; twod >= 1; twod /= 2) {
+        int twod1 = twod * 2;
+        int blocksPerGrid = (roundedLen/twod1 + threadsPerBlock - 1) / threadsPerBlock;
+        downSweep<<<blocksPerGrid, threadsPerBlock>>>(device_result, roundedLen, twod, twod1);
+    }
 
     // Wait for any work left over to be completed.
     cudaThreadSynchronize();
+
+    // finished GPU computing
     // double endTime = CycleTimer::currentSeconds();
     // double overallDuration = endTime - startTime;
     
+    // copy back the result
     cudaMemcpy(output, device_result, len * sizeof(int),
                cudaMemcpyDeviceToHost);
     // free device memory
