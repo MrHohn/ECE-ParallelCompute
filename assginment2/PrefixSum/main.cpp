@@ -32,9 +32,9 @@ int main(int argc, char* argv[])
         // printf("The actual len is : %d\n\n", len);
         
         input = new int[len];
-        // first create enough random number in this range (0, 1,000,000)
+        // first create enough random number in this range (0, 100)
         // initialize the input integers
-        int rMin = 0, rMax = 10000;
+        int rMin = 0, rMax = 100;
         createRand(input, len, rMin, rMax);
     }
     // read input file
@@ -44,13 +44,10 @@ int main(int argc, char* argv[])
         ifstream sample(file_name);
         if (sample.is_open())
         {
-            std::getline(sample, line);
-            sample.close();
-            char* line_chars = new char[line.size()];
-            sprintf(line_chars, "%s", line.c_str());
-            char* token = strtok(line_chars, " ,");
+            getline(sample, line);
             // first argument is the length
-            N = atoi(token);
+            N = stoi(line);
+            cout << N << endl;
 
             len = roundPowerTwo(N);
             // now initialize the input numbers from file
@@ -59,13 +56,14 @@ int main(int argc, char* argv[])
             {
                 if (i < N)
                 {
-                    token = strtok(NULL, " ,");
-                    input[i] = atoi(token);
+                    getline(sample, line);
+                    input[i] = stoi(line);
                 }
                 else
                 {
                     input[i] = 0;                    
                 }
+                cout << input[i] << endl;
             }
         }
         else
@@ -74,22 +72,68 @@ int main(int argc, char* argv[])
             printf("Exit now...\n");
             exit(0);
         }
-
-        // open a new file for output
-        outputFile.open ("sampleoutput");
-        outputFile << "input sample array:\n";
-        for (int i = 0; i < N; ++i)
-        {
-            outputFile << input[i] << " ";
-        }
-        outputFile << "\n\n";
+        sample.close();
     }
 
     int* outputBAnswer = new int[len];
     int* outputCAnswer = new int[len];
     int* outputBResult = new int[len];
     int* outputCResult = new int[len];
-    
+
+    printf("\n-------------------- EXCLUSIVE SCAN SECTION -------------------\n\n");
+
+    printf("First run the [serial exclusive scan]...\n");
+    double minSerialScan = 1e30;
+    for (int i = 0; i < test_iteration; ++i)
+    {
+        // flush the output buffer
+        flushBuffer(outputBAnswer, len);
+        // start to record time consumption
+        reset_and_start_timer();
+        exclusive_scan_serial(input, len, outputBAnswer);
+        // stop timer and print out total cycles
+        double one_round = get_elapsed_mcycles();
+        printf("*time of serial run %d:\t\t\t[%.3f] million cycles\n", i + 1, one_round);
+        minSerialScan = min(minSerialScan, one_round);
+    }
+    printf("[best of scan_serial]:\t\t\t[%.3f] million cycles\n", minSerialScan);
+
+    /* ------------------------------------------------------------- */
+
+    printf("\nNow run the [parallel exclusive scan]...\n");
+    double minParallelScan = 1e30;
+    for (int i = 0; i < test_iteration; ++i)
+    {
+        // flush the output buffer
+        flushBuffer(outputBResult, len);
+        double one_round = 1e30;
+        exclusive_scan_parallel(input, N, outputBResult, one_round);
+        printf("*time of parallel run %d:\t\t[%.3f] million cycles\n", i + 1, one_round);
+        minParallelScan = min(minParallelScan, one_round);
+    }
+    printf("[best of scan_parallel]:\t\t[%.3f] million cycles\n", minParallelScan);
+    printf("\t\t\t\t\t(%.2fx speedup on GPU)\n", minSerialScan / minParallelScan);
+
+    // now check the result
+    printf("Now check the correctness...");
+    if (checkCorrect(outputBAnswer, outputBResult, N))
+        printf("\t\tOutput correct!\n");
+    else
+        printf("\t\tOutput incorrect!\n");
+
+    // write out the result if use sample file
+    if (argc >= 1)
+    {
+        // open a new file for output
+        outputFile.open ("arrayA.txt");
+        outputFile << "array A for exclusive_scan:\n";
+        for (int i = 0; i < N; ++i)
+        {
+            outputFile << outputBAnswer[i] << "\n";
+        }
+        outputFile.close();
+    }
+
     printf("\n--------------------- FIND REPEAT SECTION --------------------\n\n");
 
     printf("First run the [serial find repeats]...\n");
@@ -140,80 +184,32 @@ int main(int argc, char* argv[])
     // write out the result if use sample file
     if (argc >= 1)
     {
+        // open a new file for output
+        outputFile.open ("arrayB.txt");
         outputFile << "number of entries in array B:\n";
         outputFile << repeat_count << "\n\n";
 
         outputFile << "array B for find_repeats:\n";
         for (int i = 0; i < repeat_count; ++i)
         {
-            outputFile << outputBAnswer[i] << " ";
+            outputFile << outputBAnswer[i] << "\n";
         }
-        outputFile << "\n\n";
+        outputFile.close();
+
+        // open a new file for output
+        outputFile.open ("arrayC.txt");
+        outputFile << "number of entries in array C:\n";
+        outputFile << N - repeat_count << "\n\n";
 
         outputFile << "array C for find_repeats:\n";
         for (int i = 0; i < N - repeat_count; ++i)
         {
-            outputFile << outputCAnswer[i] << " ";
+            outputFile << outputCAnswer[i] << "\n";
         }
-        outputFile << "\n\n";
-    }
-
-    printf("\n-------------------- EXCLUSIVE SCAN SECTION -------------------\n\n");
-
-    printf("First run the [serial exclusive scan]...\n");
-    int unique_count = N - repeat_count;
-    len = roundPowerTwo(unique_count);
-    double minSerialScan = 1e30;
-    for (int i = 0; i < test_iteration; ++i)
-    {
-        // flush the output buffer
-        flushBuffer(outputBAnswer, len);
-        // start to record time consumption
-        reset_and_start_timer();
-        exclusive_scan_serial(outputCAnswer, len, outputBAnswer);
-        // stop timer and print out total cycles
-        double one_round = get_elapsed_mcycles();
-        printf("*time of serial run %d:\t\t\t[%.3f] million cycles\n", i + 1, one_round);
-        minSerialScan = min(minSerialScan, one_round);
-    }
-    printf("[best of scan_serial]:\t\t\t[%.3f] million cycles\n", minSerialScan);
-
-    /* ------------------------------------------------------------- */
-
-    printf("\nNow run the [parallel exclusive scan]...\n");
-    double minParallelScan = 1e30;
-    for (int i = 0; i < test_iteration; ++i)
-    {
-        // flush the output buffer
-        flushBuffer(outputBResult, len);
-        double one_round = 1e30;
-        exclusive_scan_parallel(outputCAnswer, unique_count, outputBResult, one_round);
-        printf("*time of parallel run %d:\t\t[%.3f] million cycles\n", i + 1, one_round);
-        minParallelScan = min(minParallelScan, one_round);
-    }
-    printf("[best of scan_parallel]:\t\t[%.3f] million cycles\n", minParallelScan);
-    printf("\t\t\t\t\t(%.2fx speedup on GPU)\n", minSerialScan / minParallelScan);
-
-    // now check the result
-    printf("Now check the correctness...");
-    if (checkCorrect(outputBAnswer, outputBResult, unique_count))
-        printf("\t\tOutput correct!\n");
-    else
-        printf("\t\tOutput incorrect!\n");
-
-    printf("\n-------------------------- TEST END --------------------------\n\n");
-
-    // write out the result if use sample file
-    if (argc >= 1)
-    {
-        outputFile << "exclusive_scan of array C:\n";
-        for (int i = 0; i < unique_count; ++i)
-        {
-            outputFile << outputBAnswer[i] << " ";
-        }
-        outputFile << "\n";
         outputFile.close();
     }
+
+    printf("\n-------------------------- TEST END --------------------------\n\n");
 
     delete[] input;
     delete[] outputBAnswer;

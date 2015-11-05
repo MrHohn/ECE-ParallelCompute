@@ -17,7 +17,6 @@ NVCCFLAGS=-O3 -arch=sm_20 -m64
 
 OBJS=$(OBJDIR)/main.o  $(OBJDIR)/PrefixSum_serial.o  $(OBJDIR)/util.o  $(OBJDIR)/PrefixSum_parallel.o
 
-
 .PHONY: dirs clean
 
 default: $(EXECUTABLE)
