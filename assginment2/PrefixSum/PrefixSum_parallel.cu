@@ -118,11 +118,7 @@ __global__ void getRepeat(int* nums, int* device_outputB, int* device_outputC, i
         if (index + 1 == len)
         {
             int curC = device_outputCTemp[index];
-            if (curC != device_outputCTemp[index - 1])
-            {
-                device_outputC[curC] = nums[index];
-            }
-            return;
+            device_outputC[curC] = nums[index];
         }
         return;
     }

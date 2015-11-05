@@ -47,23 +47,13 @@ int main(int argc, char* argv[])
             getline(sample, line);
             // first argument is the length
             N = stoi(line);
-            cout << N << endl;
-
             len = roundPowerTwo(N);
             // now initialize the input numbers from file
             input = new int[len];
-            for (int i = 0; i < len; ++i)
+            for (int i = 0; i < N; ++i)
             {
-                if (i < N)
-                {
-                    getline(sample, line);
-                    input[i] = stoi(line);
-                }
-                else
-                {
-                    input[i] = 0;                    
-                }
-                cout << input[i] << endl;
+                getline(sample, line);
+                input[i] = stoi(line);
             }
         }
         else
@@ -122,7 +112,7 @@ int main(int argc, char* argv[])
         printf("\t\tOutput incorrect!\n");
 
     // write out the result if use sample file
-    if (argc >= 1)
+    if (argc > 1)
     {
         // open a new file for output
         outputFile.open ("arrayA.txt");
@@ -182,7 +172,7 @@ int main(int argc, char* argv[])
         printf("\t\tOutput incorrect!\n");
 
     // write out the result if use sample file
-    if (argc >= 1)
+    if (argc > 1)
     {
         // open a new file for output
         outputFile.open ("arrayB.txt");
