@@ -1,19 +1,15 @@
 EXECUTABLE := PrefixSum
 
-CU_FILES   := PrefixSum_parallel.cu
-
-CC_FILES   := main.cpp PrefixSum_serial.cpp util.cpp
-
-all: $(EXECUTABLE) $(REFERENCE)
+all: $(EXECUTABLE)
 
 ###########################################################
 
 OBJDIR=objs
 CXX=g++
-CXXFLAGS=-O3 -Wall -m64 -std=c++11
+CXXFLAGS=-O0 -Wall -m64 -std=c++11
 LDFLAGS=-L/usr/local/cuda/lib64/ -lcudart
 NVCC=nvcc
-NVCCFLAGS=-O3 -arch=sm_20 -m64
+NVCCFLAGS=-O0 -arch=sm_30 -m64
 
 OBJS=$(OBJDIR)/main.o  $(OBJDIR)/PrefixSum_serial.o  $(OBJDIR)/util.o  $(OBJDIR)/PrefixSum_parallel.o
 
