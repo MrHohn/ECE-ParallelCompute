@@ -111,18 +111,15 @@ int main(int argc, char* argv[])
     else
         printf("\t\tOutput incorrect!\n");
 
-    // write out the result if use sample file
-    if (argc > 1)
+    // write out the result
+    // open a new file for output
+    outputFile.open ("arrayA.txt");
+    outputFile << "array A for exclusive_scan:\n";
+    for (int i = 0; i < N; ++i)
     {
-        // open a new file for output
-        outputFile.open ("arrayA.txt");
-        outputFile << "array A for exclusive_scan:\n";
-        for (int i = 0; i < N; ++i)
-        {
-            outputFile << outputBAnswer[i] << "\n";
-        }
-        outputFile.close();
+        outputFile << outputBAnswer[i] << "\n";
     }
+    outputFile.close();
 
     printf("\n--------------------- FIND REPEAT SECTION --------------------\n\n");
 
@@ -181,32 +178,29 @@ int main(int argc, char* argv[])
     }
 
     // write out the result if use sample file
-    if (argc > 1)
+    // open a new file for output
+    outputFile.open ("arrayB.txt");
+    outputFile << "number of entries in array B:\n";
+    outputFile << repeat_count << "\n\n";
+
+    outputFile << "array B for find_repeats:\n";
+    for (int i = 0; i < repeat_count; ++i)
     {
-        // open a new file for output
-        outputFile.open ("arrayB.txt");
-        outputFile << "number of entries in array B:\n";
-        outputFile << repeat_count << "\n\n";
-
-        outputFile << "array B for find_repeats:\n";
-        for (int i = 0; i < repeat_count; ++i)
-        {
-            outputFile << outputBAnswer[i] << "\n";
-        }
-        outputFile.close();
-
-        // open a new file for output
-        outputFile.open ("arrayC.txt");
-        outputFile << "number of entries in array C:\n";
-        outputFile << N - repeat_count << "\n\n";
-
-        outputFile << "array C for find_repeats:\n";
-        for (int i = 0; i < N - repeat_count; ++i)
-        {
-            outputFile << outputCAnswer[i] << "\n";
-        }
-        outputFile.close();
+        outputFile << outputBAnswer[i] << "\n";
     }
+    outputFile.close();
+
+    // open a new file for output
+    outputFile.open ("arrayC.txt");
+    outputFile << "number of entries in array C:\n";
+    outputFile << N - repeat_count << "\n\n";
+
+    outputFile << "array C for find_repeats:\n";
+    for (int i = 0; i < N - repeat_count; ++i)
+    {
+        outputFile << outputCAnswer[i] << "\n";
+    }
+    outputFile.close();
 
     printf("\n-------------------------- TEST END --------------------------\n\n");
 
