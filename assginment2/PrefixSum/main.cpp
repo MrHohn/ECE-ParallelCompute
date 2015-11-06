@@ -173,11 +173,11 @@ int main(int argc, char* argv[])
 
     if (repeat_count == 0)
     {
-        printf("No repeat was not found.\n");
+        printf("\nNo repeat was not found.\n");
     }
     else
     {
-        printf("The last element in arrayB is: %d\n", outputBAnswer[repeat_count - 1]);
+        printf("\nThe last element in arrayB is: %d\n", outputBAnswer[repeat_count - 1]);
     }
 
     // write out the result if use sample file
