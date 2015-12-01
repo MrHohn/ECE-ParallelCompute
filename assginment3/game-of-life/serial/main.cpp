@@ -17,6 +17,7 @@ int main(int argc, char ** argv) {
 
     GameOfLife game(row, col, board);
     game.randomInit();
+    // game.specificInit();
     game.print();
     game.iterateAll(5);
 
@@ -25,5 +26,5 @@ int main(int argc, char ** argv) {
     printf("time of serial run:\t\t\t[%.3f] million cycles\n", one_round);
 
     delete[] board;
-	return 0;
+    return 0;
 }

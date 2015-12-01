@@ -13,9 +13,9 @@ GameOfLife::GameOfLife(int row, int col, int** board) {
 	cur_alive = 0;
 	// create the copy board
 	copy_board = new int*[row_size];
-    for(int i = 0; i < row_size; ++i)
-        copy_board[i] = new int[col_size];
-    copyBoard(copy_board, game_board);
+	for(int i = 0; i < row_size; ++i)
+		copy_board[i] = new int[col_size];
+	copyBoard(copy_board, game_board);
 }
 
 GameOfLife::~GameOfLife() {
@@ -25,8 +25,7 @@ GameOfLife::~GameOfLife() {
 	delete[] copy_board;
 }
 
-int GameOfLife::randomInit()
-{
+int GameOfLife::randomInit() {
 	srand(time(0));	
 	int alive = 0;
 	for (int i = 0; i < row_size; i++) {
@@ -36,6 +35,35 @@ int GameOfLife::randomInit()
 		}
 	}
 	return alive;
+}
+
+void GameOfLife::specificInit() {
+	int** init = game_board;
+	init[0][0] = DEAD;
+	init[0][1] = DEAD;
+	init[0][2] = DEAD;
+	init[0][3] = ALIVE;
+	init[1][0] = DEAD;
+	init[1][1] = DEAD;
+	init[1][2] = DEAD;
+	init[1][3] = ALIVE;
+	init[2][0] = DEAD;
+	init[2][1] = ALIVE;
+	init[2][2] = DEAD;
+	init[2][3] = DEAD;
+	init[3][0] = ALIVE;
+	init[3][1] = ALIVE;
+	init[3][2] = ALIVE;
+	init[3][3] = DEAD;
+	init[4][0] = DEAD;
+	init[4][1] = ALIVE;
+	init[4][2] = DEAD;
+	init[4][3] = DEAD;
+	init[5][0] = DEAD;
+	init[5][1] = ALIVE;
+	init[5][2] = DEAD;
+	init[5][3] = DEAD;
+	copyBoard(copy_board, game_board);
 }
 
 int GameOfLife::getNumAlive() {

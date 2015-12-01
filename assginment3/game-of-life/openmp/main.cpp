@@ -17,6 +17,7 @@ int main(int argc, char ** argv) {
 
     GameOfLife game(row, col, board);
     game.randomInit();
+    // game.specificInit();
     if (DEBUG) {
         game.print();
     }
@@ -34,5 +35,5 @@ int main(int argc, char ** argv) {
         delete board[i];
     }
     delete[] board;
-	return 0;
+    return 0;
 }

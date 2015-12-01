@@ -6,6 +6,7 @@ public:
     GameOfLife(int row, int col, int** board);
     ~GameOfLife();
 	int randomInit();
+	void specificInit();
 	void iterateOnce();
 	void iterateAll(int iteration);
 	void print();
