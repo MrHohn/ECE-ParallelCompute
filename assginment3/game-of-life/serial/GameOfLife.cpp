@@ -34,6 +34,7 @@ int GameOfLife::randomInit() {
 			alive += game_board[i][j];
 		}
 	}
+	copyBoard(copy_board, game_board);
 	return alive;
 }
 

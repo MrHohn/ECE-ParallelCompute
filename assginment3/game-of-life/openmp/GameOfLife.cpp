@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #define DEBUG 0
+#define OPENMP_ENABLED 1
 
 GameOfLife::GameOfLife(int row, int col, int** board) {
 	row_size = row;
@@ -34,6 +35,7 @@ int GameOfLife::randomInit() {
 			alive += game_board[i][j];
 		}
 	}
+	copyBoard(copy_board, game_board);
 	return alive;
 }
 
@@ -82,7 +84,7 @@ void GameOfLife::iterateOnce() {
 	++cur_iteration;
 	int alive = 0;
 
-	#pragma omp parallel for reduction(+:alive)
+	#pragma omp parallel for reduction(+:alive) if(OPENMP_ENABLED)
 	for (int i = 0; i < row_size; ++i) {
 		for (int j = 0; j < col_size; ++j) {
 			int count = countNeighbours(i, j);
@@ -97,22 +99,21 @@ void GameOfLife::iterateOnce() {
 	}
 
 	// copy back the board
-	#pragma omp parallel for
+	#pragma omp parallel for if(OPENMP_ENABLED)
 	for (int i = 0; i < row_size; ++i) {
 		for (int j = 0; j < col_size; ++j) {
 			game_board[i][j] = copy_board[i][j];
 		}
 	}
 
+	if (DEBUG) printf("current alive:%2d\n", alive);
 	cur_alive = alive;
 }
 
 void GameOfLife::iterateAll(int iteration) {
 	for (int i = 0; i < iteration; ++i) {
 		iterateOnce();
-		if (DEBUG) {
-			print();
-		}
+		if (DEBUG) print();
 		if (cur_alive == 0) {
 			printf("Game Over at Round%2d.\n", cur_iteration);
 			break;

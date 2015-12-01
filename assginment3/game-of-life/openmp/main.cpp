@@ -9,8 +9,8 @@
 int main(int argc, char ** argv) {
 
     // create a container for the game board
-    int row = 1000;
-    int col = 1000;
+    int row = 2000;
+    int col = 2000;
     int** board = new int*[row];
     for(int i = 0; i < row; ++i)
         board[i] = new int[col];
