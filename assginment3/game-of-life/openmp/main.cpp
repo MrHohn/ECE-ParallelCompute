@@ -4,26 +4,35 @@
 #include "GameOfLife.h"
 #include "timing.h"
 
+#define DEBUG 0
+
 int main(int argc, char ** argv) {
-    // start to record time consumption
-    reset_and_start_timer();
 
     // create a container for the game board
-    int row = 6;
-    int col = 4;
+    int row = 1000;
+    int col = 1000;
     int** board = new int*[row];
-	for(int i = 0; i < row; ++i)
-		board[i] = new int[col];
+    for(int i = 0; i < row; ++i)
+        board[i] = new int[col];
 
     GameOfLife game(row, col, board);
     game.randomInit();
-    game.print();
+    if (DEBUG) {
+        game.print();
+    }
+
+    // start to record time consumption
+    reset_and_start_timer();
+    
     game.iterateAll(5);
 
    // stop timer and print out total cycles
     double one_round = get_elapsed_mcycles();
-    printf("time of serial run:\t\t\t[%.3f] million cycles\n", one_round);
+    printf("time consumption:\t\t\t[%.3f] million cycles\n", one_round);
 
+    for (int i = 0; i < row; ++i) {
+        delete board[i];
+    }
     delete[] board;
 	return 0;
 }

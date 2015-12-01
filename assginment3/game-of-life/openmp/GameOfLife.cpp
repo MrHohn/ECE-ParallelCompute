@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define DEBUG 1
+#define DEBUG 0
 
 GameOfLife::GameOfLife(int row, int col, int** board) {
 	row_size = row;
@@ -54,6 +54,7 @@ void GameOfLife::iterateOnce() {
 	++cur_iteration;
 	int alive = 0;
 
+	#pragma omp parallel for reduction(+:alive)
 	for (int i = 0; i < row_size; ++i) {
 		for (int j = 0; j < col_size; ++j) {
 			int count = countNeighbours(i, j);
@@ -62,18 +63,20 @@ void GameOfLife::iterateOnce() {
 			}
 			else {
 				copy_board[i][j] = ALIVE;
-				++alive;
+				alive += 1;
 			}
 		}
 	}
-	cur_alive = alive;
 
 	// copy back the board
+	#pragma omp parallel for
 	for (int i = 0; i < row_size; ++i) {
 		for (int j = 0; j < col_size; ++j) {
 			game_board[i][j] = copy_board[i][j];
 		}
 	}
+
+	cur_alive = alive;
 }
 
 void GameOfLife::iterateAll(int iteration) {

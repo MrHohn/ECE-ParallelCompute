@@ -1,6 +1,6 @@
 CC = g++
 
-CFLAGS +=-c -g -O0 -Wall
+CFLAGS +=-c -g -O0 -Wall -fopenmp
 
 LFLAGS = 
 
@@ -13,7 +13,7 @@ EXECUTABLE = main
 all: $(SOURCES) $(EXECUTABLE)
 	
 $(EXECUTABLE): $(OBJECTS) 
-	$(CC) $(OBJECTS) -o $@ $(LFLAGS) 
+	$(CC) $(OBJECTS) -fopenmp -o $@ $(LFLAGS) 
 
 .cpp.o:
 	$(CC) $(CFLAGS) $< -o $@
