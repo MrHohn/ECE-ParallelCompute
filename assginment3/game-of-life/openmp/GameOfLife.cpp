@@ -6,20 +6,26 @@
 #define DEBUG 0
 #define OPENMP_ENABLED 1
 
-GameOfLife::GameOfLife(int row, int col, int** board) {
+GameOfLife::GameOfLife(int row, int col) {
 	row_size = row;
 	col_size = col;
-	game_board = board;
 	cur_iteration = 0;
 	cur_alive = 0;
+	// create the game board
+	game_board = new int*[row_size];
+    for(int i = 0; i < row_size; ++i)
+        game_board[i] = new int[col_size];
 	// create the copy board
 	copy_board = new int*[row_size];
 	for(int i = 0; i < row_size; ++i)
 		copy_board[i] = new int[col_size];
-	copyBoard(copy_board, game_board);
 }
 
 GameOfLife::~GameOfLife() {
+	for (int i = 0; i < row_size; ++i) {
+        delete game_board[i];
+    }
+    delete[] game_board;
 	for (int i = 0; i < row_size; ++i) {
 		delete copy_board[i];
 	}

@@ -3,7 +3,7 @@
 
 class GameOfLife {
 public:
-    GameOfLife(int row, int col, int** board);
+    GameOfLife(int row, int col);
     ~GameOfLife();
 	int randomInit();
 	void specificInit();
