@@ -12,7 +12,9 @@ int main(int argc, char ** argv) {
 	int num_process = 10;
 
     GameOfLife* game = new GameOfLife(row, col, num_process);
-    game->GridAssign();
+    game->gridAssign();
+    game->initRandomBoard();
+    game->initWorker(0);
 
     delete game;
 

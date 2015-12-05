@@ -6,9 +6,9 @@ class GameOfLife {
 public:
     GameOfLife(int row, int col, int num_pro);
     ~GameOfLife();
-	int randomInit();
-	void specificInit();
-	void GridAssign();
+	int initRandomBoard();
+	void gridAssign();
+	void initWorker(int rank);
 
 private:
 	int** game_board;
