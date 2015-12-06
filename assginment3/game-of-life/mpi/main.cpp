@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
 	int col = atoi(argv[2]);
 	int num_iterate = atoi(argv[3]);
 
-    GameOfLife* game = new GameOfLife(row, col);
+    GameOfLife* game = new GameOfLife(row, col, num_iterate);
     // init the game board if this is master process
     if (game->isMaster())
     	game->initBoard();
@@ -27,9 +27,7 @@ int main(int argc, char** argv) {
     if (game->isMaster())
         reset_and_start_timer();
 
-    for (int i = 0; i < num_iterate; ++i) {
-    	game->iterateOnce();
-    }
+	game->start();
 
 	// stop timer and print out total cycles
     if (game->isMaster()) {
@@ -40,7 +38,7 @@ int main(int argc, char** argv) {
     usleep(1000 * 400);
 
     // if the game board is not too large, print the result
-    if (game->isMaster() && row <= 20 && col <= 20) {
+    if (game->isMaster() && game->notTooLarge()) {
     	game->print();
     }
 

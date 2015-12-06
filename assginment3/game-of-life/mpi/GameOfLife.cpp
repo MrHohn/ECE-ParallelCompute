@@ -8,7 +8,7 @@
 
 using namespace std;
 
-GameOfLife::GameOfLife(int row, int col) {
+GameOfLife::GameOfLife(int row, int col, int num_iterate) {
 	if (row <= 0 || col <= 0) {
 		row_size = 6;
 		col_size = 4;
@@ -17,6 +17,7 @@ GameOfLife::GameOfLife(int row, int col) {
 		row_size = row;
 		col_size = col;
 	}
+	this->num_iterate = num_iterate;
 
 	/* initialize for MPI */
 	int fake_argc = 1;
@@ -45,15 +46,15 @@ void GameOfLife::initBoard() {
 		initSpecificBoard();
 	}
 	else {
-    	initRandomBoard();		
+		initRandomBoard();		
 	}
 }
 
 void GameOfLife::initRandomBoard() {
 	// create game board
 	game_board = new int*[row_size];
-    for(int i = 0; i < row_size; ++i)
-        game_board[i] = new int[col_size];
+	for(int i = 0; i < row_size; ++i)
+		game_board[i] = new int[col_size];
 
 	// init game board
 	srand(time(0));	
@@ -67,8 +68,8 @@ void GameOfLife::initRandomBoard() {
 void GameOfLife::initSpecificBoard() {
 	// create game board
 	game_board = new int*[row_size];
-    for(int i = 0; i < row_size; ++i)
-        game_board[i] = new int[col_size];
+	for(int i = 0; i < row_size; ++i)
+		game_board[i] = new int[col_size];
 
 	game_board[0][0] = DEAD;
 	game_board[0][1] = DEAD;
@@ -131,17 +132,20 @@ void GameOfLife::gridAssign() {
 	extra_last_row = row_size - num_node_in_row * row_per_node;
 	extra_last_col = col_size - num_node_in_col * col_per_node;
 
-	if (DEBUG && rank == 0) printf(" num_node_in_row: %d\n" \
-								   " num_node_in_col: %d\n" \
-								   " row_per_node: %d\n" \
-								   " col_per_node: %d\n" \
-								   " extra_last_row: %d\n" \
-								   " extra_last_col: %d\n\n", num_node_in_row, 
-								  	  num_node_in_col, 
-								  	  row_per_node, 
-								  	  col_per_node, 
-								  	  extra_last_row, 
-								  	  extra_last_col); 
+	if (DEBUG && rank == 0) 
+		printf(
+			" num_node_in_row: %d\n" \
+			" num_node_in_col: %d\n" \
+			" row_per_node: %d\n" \
+			" col_per_node: %d\n" \
+			" extra_last_row: %d\n" \
+			" extra_last_col: %d\n\n", 
+			num_node_in_row, 
+			num_node_in_col, 
+			row_per_node, 
+			col_per_node, 
+			extra_last_row, 
+			extra_last_col); 
 }
 
 void GameOfLife::initWorker() {
@@ -167,22 +171,24 @@ void GameOfLife::initWorker() {
 	if (DEBUG && rank == 0) printf(" worker_row_size: %d\n worker_col_size: %d\n\n", worker_row_size, worker_col_size);
 
 	// create worker
-	worker = new GameWorker(worker_row_size, 
-							worker_col_size, 
-							row_id, 
-							col_id, 
-							row_size, 
-							col_size, 
-							row_per_node, 
-							col_per_node,
-							extra_last_row,
-							extra_last_col);
+	worker = new GameWorker(
+		worker_row_size, 
+		worker_col_size, 
+		row_id, 
+		col_id, 
+		row_size, 
+		col_size, 
+		row_per_node, 
+		col_per_node,
+		extra_last_row,
+		extra_last_col,
+		num_node_in_row,
+		num_node_in_col,
+		num_iterate);
 
 	// init the game board
 	if (rank == 0) {
-		int needed_len = (row_per_node + extra_last_row + 2) 
-					   * (col_per_node + extra_last_col + 2)
-					   * 2;
+		int needed_len = (row_per_node + extra_last_row + 2) * (col_per_node + extra_last_col + 2) * 2;
 		// first send out all sub-boards
 		for (int temp_rank = 1; temp_rank < num_process; ++temp_rank) {
 			// calculate the starting point and range
@@ -214,19 +220,21 @@ void GameOfLife::initWorker() {
 			MPI_Send(buf, needed_len, MPI_CHAR, temp_rank, 0, MPI_COMM_WORLD);
 
 			/*
-			if (DEBUG && rank == 0) printf(" temp_rank: %d\n" \
-										   " temp_row_id: %d\n" \
-										   " temp_col_id: %d\n" \
-										   " temp_start_row: %d\n" \
-										   " temp_start_col: %d\n" \
-										   " send: %s\n\n", 
-										   temp_rank,
-										   temp_row_id, 
-										   temp_col_id, 
-				                           temp_start_row, 
-				                           temp_start_col, 
-				                           buf);
-				                           */
+			if (DEBUG && rank == 0) 
+				printf(
+					" temp_rank: %d\n" \
+					" temp_row_id: %d\n" \
+					" temp_col_id: %d\n" \
+					" temp_start_row: %d\n" \
+					" temp_start_col: %d\n" \
+					" send: %s\n\n", 
+					temp_rank,
+					temp_row_id, 
+					temp_col_id, 
+					temp_start_row, 
+					temp_start_col, 
+					buf);
+			*/
 		}
 		// now init the local board
 		worker->initBoardLocal(game_board);
@@ -246,8 +254,21 @@ int GameOfLife::getCellStatus(int row, int col) {
 	return game_board[row][col];
 }
 
-void GameOfLife::iterateOnce() {
+void GameOfLife::start() {
+	for (int i = 0; i < num_iterate; ++i) {
+		iterateOnce();
+	}
+}
 
+void GameOfLife::iterateOnce() {
+	worker->iterateOnce();
+	++cur_iteration;
+
+	if (rank == 0 && 
+		(PRINT_PROCESS && notTooLarge()) &&
+		cur_iteration != num_iterate) {
+		print();
+	}
 }
 
 bool GameOfLife::isMaster() {
@@ -255,6 +276,7 @@ bool GameOfLife::isMaster() {
 }
 
 void GameOfLife::print() {
+	printf("Round%2d:\n------\n", cur_iteration);
 	for (int i = 0; i < row_size; i++) {
 		for (int j = 0; j < col_size; j++) {
 			char status = game_board[i][j]?'1':'0';
@@ -263,4 +285,11 @@ void GameOfLife::print() {
 		printf("\n");
 	}
 	printf("\n");
+}
+
+bool GameOfLife::notTooLarge() {
+	if (row_size <= 20 && col_size <= 20) {
+		return true;
+	}
+	return false;
 }
