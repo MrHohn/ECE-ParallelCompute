@@ -5,6 +5,8 @@
 #include "GameWorker.h"
 #include "debug_config.h"
 
+#define MASTER 0
+
 using namespace std;
 
 GameWorker::GameWorker(
@@ -22,19 +24,19 @@ GameWorker::GameWorker(
 	int num_node_in_col,
 	int num_iterate) {
 
-	this->row_size = row_size;
-	this->col_size = col_size;
-	this->row_id = row_id;
-	this->col_id = col_id;
-	this->total_row = total_row;
-	this->total_col = total_col;
+	this->row_size =        row_size;
+	this->col_size =        col_size;
+	this->row_id =          row_id;
+	this->col_id =          col_id;
+	this->total_row =       total_row;
+	this->total_col =       total_col;
 	this->row_size_normal = row_size_normal;
 	this->col_size_normal = col_size_normal;
-	this->extra_last_row = extra_last_row;
-	this->extra_last_col = extra_last_col;
+	this->extra_last_row =  extra_last_row;
+	this->extra_last_col =  extra_last_col;
 	this->num_node_in_row = num_node_in_row;
 	this->num_node_in_col = num_node_in_col;
-	this->num_iterate = num_iterate;
+	this->num_iterate =     num_iterate;
 
 	// create the game boards
 	game_board = new int*[row_size + 2];
@@ -46,6 +48,7 @@ GameWorker::GameWorker(
 
 	updated = false;
 	cur_iteration = 0;
+	num_process = 0;
 }
 
 GameWorker::~GameWorker() {
@@ -58,6 +61,10 @@ GameWorker::~GameWorker() {
 }
 
 void GameWorker::initBoardLocal(int** whole_board) {
+	this->whole_board = whole_board;
+	/* get number of processes */
+	MPI_Comm_size(MPI_COMM_WORLD, &num_process);
+
 	int start_row = (row_id - 1) * row_size_normal;
 	int start_col = (col_id - 1) * col_size_normal;
 	// if (DEBUG) printf(" start_row: %d\n start_col: %d\n\n", start_row, start_col);
@@ -80,7 +87,7 @@ void GameWorker::initBoardMPI() {
 	int needed_len = (row_size_normal + extra_last_row + 2) * (col_size_normal + extra_last_col + 2) * 2;
 	char buf[needed_len];
 	// receive initial data from master
-	MPI_Recv(buf, needed_len, MPI_CHAR, 0, 0, MPI_COMM_WORLD, &status);
+	MPI_Recv(buf, needed_len, MPI_CHAR, MASTER, 0, MPI_COMM_WORLD, &status);
 	// if (DEBUG) printf("%d %d: %s\n", row_id, col_id, buf);
 	for (int i = 0; i < row_size + 2; ++i) {
 		for (int j = 0; j < col_size + 2; ++j) {
@@ -132,7 +139,7 @@ void GameWorker::iterateOnce() {
 		// then retrieve remote copies
 		recvFromNeighbours();
 	}
-
+	
 	// now iterate
 	for (int i = 1; i < row_size + 1; ++i) {
 		for (int j = 1; j < col_size + 1; ++j) {
@@ -154,7 +161,7 @@ void GameWorker::iterateOnce() {
 
 	// if need to print the process, send intermediate results to master
 	if (cur_iteration == num_iterate || PRINT_PROCESS) {
-		if (row_id == 0 && col_id == 0) {
+		if (row_id == 1 && col_id == 1) {
 			recvSubBoard();
 		}
 		else {
@@ -172,22 +179,85 @@ void GameWorker::recvFromNeighbours() {
 }
 
 void GameWorker::sendSubBoard() {
-
+	int temp_needed_len = row_size * col_size * 2 + 1;
+	// concatenate cells into a char array and send it out
+	char buf[temp_needed_len];
+	char* cur = buf;
+	for (int i = 1; i < row_size + 1; ++i) {
+		for (int j = 1; j < col_size + 1; ++j) {
+			sprintf(cur, "%d,", game_board[i][j]);
+			cur += 2;
+		}
+	}
+	// add one more space to avoid messy code
+	sprintf(cur, " ");
+	MPI_Send(buf, temp_needed_len, MPI_CHAR, MASTER, 0, MPI_COMM_WORLD);
 }
 
 void GameWorker::recvSubBoard() {
+	// first update self board to original board
+	int temp_start_row = (row_id - 1) * row_size_normal;
+	int temp_start_col = (col_id - 1) * col_size_normal;
+	// if (DEBUG) printf(" temp_start_row: %d\n temp_start_col: %d\n\n", temp_start_row, temp_start_col);
+	for (int i = 0; i < row_size; ++i) {
+		for (int j = 0; j < col_size; ++j) {
+			whole_board[temp_start_row + i][temp_start_col + i] = game_board[i + 1][j + 1];
+		}
+	}
 
+	// receive subboards from all slaves	
+	for (int temp_rank = 1; temp_rank < num_process; ++temp_rank) {
+		int temp_row_id, temp_col_id;
+		int worker_row_size = row_size_normal;
+		int worker_col_size = col_size_normal;
+
+		// id both start from 1
+		temp_row_id = temp_rank / num_node_in_col + 1;
+		temp_col_id = temp_rank - (temp_row_id - 1) * num_node_in_col + 1;
+
+		// if it is the last node in a row or column
+		// allocate extra work
+		if (temp_row_id == num_node_in_row) {
+			worker_row_size += extra_last_row;
+		}
+		if (temp_col_id == num_node_in_col) {
+			worker_col_size += extra_last_col;
+		}
+
+		temp_start_row = (temp_row_id - 1) * row_size_normal;
+		temp_start_col = (temp_col_id - 1) * col_size_normal;
+
+		// finished calculation, now receiving
+		int needed_len = worker_row_size * worker_col_size * 2 + 1;
+		// printf("row: %d, col: %d, needed: %d\n", temp_row_id, temp_col_id, needed_len);
+		char buf[needed_len];
+		MPI_Recv(buf, needed_len, MPI_CHAR, temp_rank, 0, MPI_COMM_WORLD, &status);
+		if (DEBUG) printf("#%d, buf: %s\n", temp_rank, buf);
+
+		for (int i = 0; i < worker_row_size; ++i) {
+			for (int j = 0; j < worker_col_size; ++j) {
+				char* tmp;
+				if (i == 0 && j == 0) {
+					tmp = strtok(buf, ",");
+				}
+				else {
+					tmp = strtok(NULL, ",");
+				}
+				whole_board[temp_start_row + i][temp_start_col + j] = atoi(tmp);
+			}
+		}
+	}
 }
 
 int GameWorker::countNeighbours(int row, int col) {
 	int alive = 0;
 	if (checkAlive(row - 1, col - 1)) ++alive;
-	if (checkAlive(row - 1, col)) ++alive;
+	if (checkAlive(row - 1, col))     ++alive;
 	if (checkAlive(row - 1, col + 1)) ++alive;
-	if (checkAlive(row, col - 1)) ++alive;
-	if (checkAlive(row, col + 1)) ++alive;
+	if (checkAlive(row, col - 1))     ++alive;
+	if (checkAlive(row, col + 1))     ++alive;
 	if (checkAlive(row + 1, col - 1)) ++alive;
-	if (checkAlive(row + 1, col)) ++alive;
+	if (checkAlive(row + 1, col))     ++alive;
 	if (checkAlive(row + 1, col + 1)) ++alive;
 
 	return alive;

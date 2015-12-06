@@ -62,6 +62,8 @@ private:
 	int  extra_last_col;
 	int**game_board;
 	int**copy_board;
+	int**whole_board;
+	int  num_process;
 	bool updated;
 };
 

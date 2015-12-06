@@ -10,3 +10,6 @@ assginment2/PrefixSum/PrefixSum
 assginment2/PrefixSum/arrayA.txt
 assginment2/PrefixSum/arrayB.txt
 assginment2/PrefixSum/arrayC.txt
+assginment3/game-of-life/openmp/main
+assginment3/game-of-life/serial/main
+assginment3/game-of-life/mpi/main

@@ -35,8 +35,8 @@ GameOfLife::~GameOfLife() {
 	// delete the game board if it is master
 	if (rank == 0) {
 		for (int i = 0; i < row_size; ++i)
-	        delete game_board[i];
-	    delete[] game_board;
+			delete game_board[i];
+		delete[] game_board;
 	}
 	delete worker;
 }
@@ -212,8 +212,7 @@ void GameOfLife::initWorker() {
 			char* cur = buf;
 			for (int i = -1; i < temp_worker_row_size + 1; ++i) {
 				for (int j = -1; j < temp_worker_col_size + 1; ++j) {
-					sprintf(cur, "%d,", getCellStatus(i + temp_start_row, 
-													  j + temp_start_col));
+					sprintf(cur, "%d,", getCellStatus(i + temp_start_row, j + temp_start_col));
 					cur += 2;
 				}
 			}
