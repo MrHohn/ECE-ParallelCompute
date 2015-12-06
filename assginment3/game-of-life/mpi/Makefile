@@ -1,4 +1,4 @@
-CC = g++
+CC = mpic++
 
 CFLAGS +=-c -g -O0 -Wall
 

@@ -1,12 +1,23 @@
-#include "GameWorker.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
-#define DEBUG 1
+#include "GameWorker.h"
+#include "debug_config.h"
 
 using namespace std;
 
-GameWorker::GameWorker(int row_size, int col_size, int row_id, int col_id, int total_row, int total_col, int row_size_normal, int col_size_normal) {
+GameWorker::GameWorker(int row_size, 
+					   int col_size, 
+					   int row_id, 
+					   int col_id, 
+					   int total_row, 
+					   int total_col, 
+					   int row_size_normal, 
+					   int col_size_normal,
+					   int extra_last_row,
+					   int extra_last_col) {
+
 	this->row_size = row_size;
 	this->col_size = col_size;
 	this->row_id = row_id;
@@ -15,25 +26,27 @@ GameWorker::GameWorker(int row_size, int col_size, int row_id, int col_id, int t
 	this->total_col = total_col;
 	this->row_size_normal = row_size_normal;
 	this->col_size_normal = col_size_normal;
+	this-> extra_last_row = extra_last_row;
+	this-> extra_last_col = extra_last_col;
 
 	// create the game boards
 	game_board = new int*[row_size + 2];
 	copy_board = new int*[row_size + 2];
-    for(int i = 0; i < row_size + 2; ++i) {
-        game_board[i] = new int[col_size + 2];
+	for(int i = 0; i < row_size + 2; ++i) {
+		game_board[i] = new int[col_size + 2];
 		copy_board[i] = new int[col_size + 2];
-    }
+	}
 
-    updated = false;
-    cur_iteration = 0;
+	updated = false;
+	cur_iteration = 0;
 }
 
 GameWorker::~GameWorker() {
 	for (int i = 0; i < row_size + 2; ++i) {
-        delete game_board[i];
+		delete game_board[i];
 		delete copy_board[i];
-    }
-    delete[] game_board;
+	}
+	delete[] game_board;
 	delete[] copy_board;
 }
 
@@ -50,14 +63,32 @@ void GameWorker::initBoardLocal(int** whole_board) {
 	}
 
 	// copy the board
-	copyBoard(copy_board, game_board, row_size + 2, col_size + 2);
+	copyBoard(copy_board, game_board, 0, row_size + 1, 0, col_size + 1);
 
 	updated = true;
 }
 
 void GameWorker::initBoardMPI() {
 	// call MPI to retrieve data from master
-
+	int needed_len = (row_size_normal + extra_last_row + 2) 
+					   * (col_size_normal + extra_last_col + 2)
+					   * 2;
+	char buf[needed_len];
+	// receive initial data from master
+	MPI_Recv(buf, needed_len, MPI_CHAR, 0, 0, MPI_COMM_WORLD, &status);
+	// if (DEBUG) printf("%d %d: %s\n", row_id, col_id, buf);
+	for (int i = 0; i < row_size + 2; ++i) {
+		for (int j = 0; j < col_size + 2; ++j) {
+			char* tmp;
+			if (i == 0 && j == 0) {
+				tmp = strtok(buf, ",");
+			}
+			else {
+				tmp = strtok(NULL, ",");
+			}
+			game_board[i][j] = atoi(tmp);
+		}
+	}
 
 	updated = true;
 }
@@ -73,9 +104,15 @@ bool GameWorker::checkExist(int row, int col) {
 	return true;
 }
 
-void GameWorker::copyBoard(int** copyTo, int** copyFrom, int row_copy, int col_copy) {
-	for (int i = 0; i < row_copy; ++i) {
-		for (int j = 0; j < col_copy; ++j) {
+void GameWorker::copyBoard(int** copyTo, 
+						   int** copyFrom, 
+						   int start_row, 
+						   int end_row, 
+						   int start_col, 
+						   int end_col) {
+	
+	for (int i = start_row; i < end_row; ++i) {
+		for (int j = start_col; j < end_col; ++j) {
 			copyTo[i][j] = copyFrom[i][j];
 		}
 	}
@@ -84,6 +121,7 @@ void GameWorker::copyBoard(int** copyTo, int** copyFrom, int row_copy, int col_c
 void GameWorker::iterateOnce() {
 	if (!updated) {
 		// call MPI to get updated neighbours
+
 	}
 
 	// now iterate
@@ -102,7 +140,7 @@ void GameWorker::iterateOnce() {
 	}
 
 	// copy back the board
-	copyBoard(game_board, copy_board, row_size + 2, col_size + 2);
+	copyBoard(game_board, copy_board, 1, row_size - 1, 0, col_size - 1);
 
 	updated = false;
 }
