@@ -67,11 +67,11 @@ void GameWorker::initBoardLocal(int** whole_board) {
 
 	int start_row = (row_id - 1) * row_size_normal;
 	int start_col = (col_id - 1) * col_size_normal;
-	// if (DEBUG) printf(" start_row: %d\n start_col: %d\n\n", start_row, start_col);
+	if (DEBUG) printf(" start_row: %d\n start_col: %d\n\n", start_row, start_col);
 	for (int i = -1; i < row_size + 1; ++i) {
 		for (int j = -1; j < col_size + 1; ++j) {
 			if (checkExist(start_row + i, start_col + j)) {
-				game_board[i + 1][j + 1] = whole_board[start_row + i][start_col + i];
+				game_board[i + 1][j + 1] = whole_board[start_row + i][start_col + j];
 			}
 		}
 	}
@@ -84,7 +84,7 @@ void GameWorker::initBoardLocal(int** whole_board) {
 
 void GameWorker::initBoardMPI() {
 	// call MPI to retrieve data from master
-	int needed_len = (row_size_normal + extra_last_row + 2) * (col_size_normal + extra_last_col + 2) * 2;
+	int needed_len = (row_size_normal + extra_last_row + 2) * (col_size_normal + extra_last_col + 2) * 2 + 1;
 	char buf[needed_len];
 	// receive initial data from master
 	MPI_Recv(buf, needed_len, MPI_CHAR, MASTER, 0, MPI_COMM_WORLD, &status);
@@ -102,6 +102,9 @@ void GameWorker::initBoardMPI() {
 		}
 	}
 
+	// copy the board
+	copyBoard(copy_board, game_board, 0, row_size + 1, 0, col_size + 1);
+
 	updated = true;
 }
 
@@ -116,6 +119,17 @@ bool GameWorker::checkExist(int row, int col) {
 	return true;
 }
 
+// check if a specific block exists
+bool GameWorker::checkBlockExist(int rid, int cid) {
+	if (rid <= 0 || rid >= num_node_in_row) {
+		return false;
+	}
+	if (cid <= 0 || cid >= num_node_in_col) {
+		return false;
+	}
+	return true;
+}
+
 void GameWorker::copyBoard(
 	int** copyTo, 
 	int** copyFrom, 
@@ -124,21 +138,21 @@ void GameWorker::copyBoard(
 	int   start_col, 
 	int   end_col) {
 	
-	for (int i = start_row; i < end_row; ++i) {
-		for (int j = start_col; j < end_col; ++j) {
+	for (int i = start_row; i <= end_row; ++i) {
+		for (int j = start_col; j <= end_col; ++j) {
 			copyTo[i][j] = copyFrom[i][j];
 		}
 	}
 }
 
 void GameWorker::iterateOnce() {
-	if (!updated) {
-		// call MPI to get updated neighbours
-		// send out the local copy first
-		sendToNeighbours();
-		// then retrieve remote copies
-		recvFromNeighbours();
-	}
+	// if (!updated) {
+	// 	// call MPI to get updated neighbours
+	// 	// send out the local copy first
+	// 	sendToNeighbours();
+	// 	// then retrieve remote copies
+	// 	recvFromNeighbours();
+	// }
 	
 	// now iterate
 	for (int i = 1; i < row_size + 1; ++i) {
@@ -153,15 +167,21 @@ void GameWorker::iterateOnce() {
 		}
 	}
 	++cur_iteration;
-
+	
 	// copy back the board
-	copyBoard(game_board, copy_board, 1, row_size - 1, 0, col_size - 1);
+	copyBoard(game_board, copy_board, 1, row_size, 1, col_size);
 
 	updated = false;
 
 	// if need to print the process, send intermediate results to master
 	if (cur_iteration == num_iterate || PRINT_PROCESS) {
 		if (row_id == 1 && col_id == 1) {
+			// remember to also copy back the master copy
+			for (int i = 0; i < row_size; ++i) {
+				for (int j = 0; j < col_size; ++j) {
+					whole_board[i][j] = game_board[i + 1][j + 1];
+				}
+			}
 			recvSubBoard();
 		}
 		else {
@@ -170,12 +190,194 @@ void GameWorker::iterateOnce() {
 	}
 }
 
-void GameWorker::sendToNeighbours() {
+int GameWorker::getRank(int temp_row_id, int temp_col_id) {
+	int temp_rank = 0;
+	temp_rank += (temp_row_id - 1) * num_node_in_col;
+	temp_rank += temp_col_id;
+	return temp_rank;
+}
 
+void GameWorker::sendToNeighbours() {
+	// top left
+	int temp_rank;
+	if (checkBlockExist(row_id - 1, col_id - 1)) {
+		temp_rank = getRank(row_id - 1, col_id - 1);
+		MPI_Send(&game_board[1][1], 1, MPI_INT, temp_rank, 0, MPI_COMM_WORLD);
+	}
+	// bottom left
+	if (checkBlockExist(row_id + 1, col_id - 1)) {
+		temp_rank = getRank(row_id + 1, col_id - 1);
+		MPI_Send(&game_board[row_size][1], 1, MPI_INT, temp_rank, 0, MPI_COMM_WORLD);
+	}
+	// top right
+	if (checkBlockExist(row_id - 1, col_id + 1)) {
+		temp_rank = getRank(row_id - 1, col_id + 1);
+		MPI_Send(&game_board[1][col_size], 1, MPI_INT, temp_rank, 0, MPI_COMM_WORLD);
+	}
+	// bottom right
+	if (checkBlockExist(row_id + 1, col_id + 1)) {
+		temp_rank = getRank(row_id + 1, col_id + 1);
+		MPI_Send(&game_board[row_size][col_size], 1, MPI_INT, temp_rank, 0, MPI_COMM_WORLD);
+	}
+
+	int temp_needed_len;
+	// left
+	if (checkBlockExist(row_id, col_id - 1)) {
+		temp_rank = getRank(row_id, col_id - 1);
+		temp_needed_len = row_size * 2 + 1;
+		// concatenate cells into a char array and send it out
+		char buf[temp_needed_len];
+		char* cur = buf;
+		for (int i = 1; i < row_size + 1; ++i) {
+			sprintf(cur, "%d,", game_board[i][1]);
+			cur += 2;
+		}
+		// add one more space to avoid messy code
+		sprintf(cur, " ");
+		MPI_Send(buf, temp_needed_len, MPI_CHAR, temp_rank, 0, MPI_COMM_WORLD);
+	}
+	// right
+	if (checkBlockExist(row_id, col_id + 1)) {
+		temp_rank = getRank(row_id, col_id + 1);
+		temp_needed_len = row_size * 2 + 1;
+		// concatenate cells into a char array and send it out
+		char buf[temp_needed_len];
+		char* cur = buf;
+		for (int i = 1; i < row_size + 1; ++i) {
+			sprintf(cur, "%d,", game_board[i][col_size]);
+			cur += 2;
+		}
+		// add one more space to avoid messy code
+		sprintf(cur, " ");
+		MPI_Send(buf, temp_needed_len, MPI_CHAR, temp_rank, 0, MPI_COMM_WORLD);
+	}
+	// top
+	if (checkBlockExist(row_id - 1, col_id)) {
+		temp_rank = getRank(row_id - 1, col_id);
+		temp_needed_len = col_size * 2 + 1;
+		// concatenate cells into a char array and send it out
+		char buf[temp_needed_len];
+		char* cur = buf;
+		for (int i = 1; i < col_size + 1; ++i) {
+			sprintf(cur, "%d,", game_board[1][i]);
+			cur += 2;
+		}
+		// add one more space to avoid messy code
+		sprintf(cur, " ");
+		MPI_Send(buf, temp_needed_len, MPI_CHAR, temp_rank, 0, MPI_COMM_WORLD);
+	}
+	// bottom
+	if (checkBlockExist(row_id + 1, col_id)) {
+		temp_rank = getRank(row_id + 1, col_id);
+		temp_needed_len = col_size * 2 + 1;
+		// concatenate cells into a char array and send it out
+		char buf[temp_needed_len];
+		char* cur = buf;
+		for (int i = 1; i < col_size + 1; ++i) {
+			sprintf(cur, "%d,", game_board[row_size][i]);
+			cur += 2;
+		}
+		// add one more space to avoid messy code
+		sprintf(cur, " ");
+		MPI_Send(buf, temp_needed_len, MPI_CHAR, temp_rank, 0, MPI_COMM_WORLD);
+	}
 }
 
 void GameWorker::recvFromNeighbours() {
+	// top left
+	int temp_rank;
+	if (checkBlockExist(row_id - 1, col_id - 1)) {
+		temp_rank = getRank(row_id - 1, col_id - 1);
+		MPI_Recv(&copy_board[0][0], 1, MPI_INT, temp_rank, 0, MPI_COMM_WORLD, &status);
+	}
+	// bottom left
+	if (checkBlockExist(row_id + 1, col_id - 1)) {
+		temp_rank = getRank(row_id + 1, col_id - 1);
+		MPI_Recv(&copy_board[row_size + 1][0], 1, MPI_INT, temp_rank, 0, MPI_COMM_WORLD, &status);
+	}
+	// top right
+	if (checkBlockExist(row_id - 1, col_id + 1)) {
+		temp_rank = getRank(row_id - 1, col_id + 1);
+		MPI_Recv(&copy_board[0][col_size + 1], 1, MPI_INT, temp_rank, 0, MPI_COMM_WORLD, &status);
+	}
+	// bottom right
+	if (checkBlockExist(row_id + 1, col_id + 1)) {
+		temp_rank = getRank(row_id + 1, col_id + 1);
+		MPI_Recv(&copy_board[row_size + 1][col_size + 1], 1, MPI_INT, temp_rank, 0, MPI_COMM_WORLD, &status);
+	}
 
+	int temp_needed_len;
+	// left
+	if (checkBlockExist(row_id, col_id - 1)) {
+		temp_rank = getRank(row_id, col_id - 1);
+		temp_needed_len = row_size * 2 + 1;
+		char buf[temp_needed_len];
+		MPI_Recv(buf, temp_needed_len, MPI_CHAR, MASTER, 0, MPI_COMM_WORLD, &status);
+		for (int i = 1; i < row_size + 1; ++i) {
+			char* tmp;
+			if (i == 1) {
+				tmp = strtok(buf, ",");
+			}
+			else {
+				tmp = strtok(NULL, ",");
+			}
+			copy_board[i][1] = atoi(tmp);
+		}
+	}
+	// right
+	if (checkBlockExist(row_id, col_id + 1)) {
+		temp_rank = getRank(row_id, col_id + 1);
+		temp_needed_len = row_size * 2 + 1;
+		// concatenate cells into a char array and send it out
+		char buf[temp_needed_len];
+		MPI_Recv(buf, temp_needed_len, MPI_CHAR, MASTER, 0, MPI_COMM_WORLD, &status);
+		for (int i = 1; i < row_size + 1; ++i) {
+			char* tmp;
+			if (i == 1) {
+				tmp = strtok(buf, ",");
+			}
+			else {
+				tmp = strtok(NULL, ",");
+			}
+			copy_board[i][col_size] = atoi(tmp);
+		}
+	}
+	// top
+	if (checkBlockExist(row_id - 1, col_id)) {
+		temp_rank = getRank(row_id - 1, col_id);
+		temp_needed_len = col_size * 2 + 1;
+		// concatenate cells into a char array and send it out
+		char buf[temp_needed_len];
+		MPI_Recv(buf, temp_needed_len, MPI_CHAR, MASTER, 0, MPI_COMM_WORLD, &status);
+		for (int i = 1; i < col_size + 1; ++i) {
+			char* tmp;
+			if (i == 1) {
+				tmp = strtok(buf, ",");
+			}
+			else {
+				tmp = strtok(NULL, ",");
+			}
+			copy_board[1][i] = atoi(tmp);
+		}
+	}
+	// bottom
+	if (checkBlockExist(row_id + 1, col_id)) {
+		temp_rank = getRank(row_id + 1, col_id);
+		temp_needed_len = col_size * 2 + 1;
+		// concatenate cells into a char array and send it out
+		char buf[temp_needed_len];
+		MPI_Recv(buf, temp_needed_len, MPI_CHAR, MASTER, 0, MPI_COMM_WORLD, &status);
+		for (int i = 1; i < col_size + 1; ++i) {
+			char* tmp;
+			if (i == 1) {
+				tmp = strtok(buf, ",");
+			}
+			else {
+				tmp = strtok(NULL, ",");
+			}
+			copy_board[row_size][i] = atoi(tmp);
+		}
+	}
 }
 
 void GameWorker::sendSubBoard() {
@@ -229,7 +431,6 @@ void GameWorker::recvSubBoard() {
 
 		// finished calculation, now receiving
 		int needed_len = worker_row_size * worker_col_size * 2 + 1;
-		// printf("row: %d, col: %d, needed: %d\n", temp_row_id, temp_col_id, needed_len);
 		char buf[needed_len];
 		MPI_Recv(buf, needed_len, MPI_CHAR, temp_rank, 0, MPI_COMM_WORLD, &status);
 		if (DEBUG) printf("#%d, buf: %s\n", temp_rank, buf);
@@ -251,18 +452,37 @@ void GameWorker::recvSubBoard() {
 
 int GameWorker::countNeighbours(int row, int col) {
 	int alive = 0;
-	if (checkAlive(row - 1, col - 1)) ++alive;
-	if (checkAlive(row - 1, col))     ++alive;
-	if (checkAlive(row - 1, col + 1)) ++alive;
-	if (checkAlive(row, col - 1))     ++alive;
-	if (checkAlive(row, col + 1))     ++alive;
-	if (checkAlive(row + 1, col - 1)) ++alive;
-	if (checkAlive(row + 1, col))     ++alive;
-	if (checkAlive(row + 1, col + 1)) ++alive;
+	if (checkAlive(row - 1, col - 1))
+		++alive;
+	if (checkAlive(row - 1, col))
+		++alive;
+	if (checkAlive(row - 1, col + 1))
+		++alive;
+	if (checkAlive(row, col - 1))
+		++alive;
+	if (checkAlive(row, col + 1))
+		++alive;
+	if (checkAlive(row + 1, col - 1))
+		++alive;
+	if (checkAlive(row + 1, col))
+		++alive;
+	if (checkAlive(row + 1, col + 1))
+		++alive;
 
 	return alive;
 }
 
 bool GameWorker::checkAlive(int row, int col) {
 	return game_board[row][col] == ALIVE;
+}
+
+void GameWorker::print() {
+	for (int i = 0; i < row_size + 2; i++) {
+		for (int j = 0; j < col_size + 2; j++) {
+			char status = game_board[i][j]?'1':'0';
+			printf("%c ", status);
+		}
+		printf("\n");
+	}
+	printf("\n");
 }

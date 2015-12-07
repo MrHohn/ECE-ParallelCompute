@@ -25,13 +25,16 @@ public:
 	void iterateOnce();
 
 private:
+	void print();
 	void sendSubBoard();
 	void recvSubBoard();
 	void sendToNeighbours();
 	void recvFromNeighbours();
 	bool checkAlive(int row, int col);
 	bool checkExist(int row, int col);
+	bool checkBlockExist(int rid, int cid);
 	int  countNeighbours(int row, int col);
+	int  getRank(int temp_row_id, int temp_col_id);
 	void copyBoard(
 		int** copyTo, 
 		int** copyFrom, 

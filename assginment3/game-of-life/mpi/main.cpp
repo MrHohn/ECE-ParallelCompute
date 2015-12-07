@@ -23,6 +23,11 @@ int main(int argc, char** argv) {
     game->gridAssign();
     game->initWorker();
 
+    // if the game board is not too large, print the result
+    if (game->isMaster() && game->notTooLarge()) {
+        game->print();
+    }
+
     // start to record time consumption
     if (game->isMaster())
         reset_and_start_timer();

@@ -41,6 +41,7 @@ private:
 	int   extra_last_row;
 	int   extra_last_col;
 	int   rank;
+	bool  random;
 };
 
 #endif /* GAMEOFLIFE */

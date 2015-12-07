@@ -12,10 +12,12 @@ GameOfLife::GameOfLife(int row, int col, int num_iterate) {
 	if (row <= 0 || col <= 0) {
 		row_size = 6;
 		col_size = 4;
+		random = false;
 	}
 	else {
 		row_size = row;
 		col_size = col;
+		random = true;
 	}
 	this->num_iterate = num_iterate;
 
@@ -42,7 +44,7 @@ GameOfLife::~GameOfLife() {
 }
 
 void GameOfLife::initBoard() {
-	if ((row_size <=0 || col_size <= 0)) {
+	if (!random) {
 		initSpecificBoard();
 	}
 	else {
@@ -186,9 +188,9 @@ void GameOfLife::initWorker() {
 		num_node_in_col,
 		num_iterate);
 
-	// init the game board
+	// init the game board for all slaves
 	if (rank == 0) {
-		int needed_len = (row_per_node + extra_last_row + 2) * (col_per_node + extra_last_col + 2) * 2;
+		int needed_len = (row_per_node + extra_last_row + 2) * (col_per_node + extra_last_col + 2) * 2 + 1;
 		// first send out all sub-boards
 		for (int temp_rank = 1; temp_rank < num_process; ++temp_rank) {
 			// calculate the starting point and range
@@ -216,6 +218,8 @@ void GameOfLife::initWorker() {
 					cur += 2;
 				}
 			}
+			// add one more space to avoid messy code
+			sprintf(cur, " ");
 			MPI_Send(buf, needed_len, MPI_CHAR, temp_rank, 0, MPI_COMM_WORLD);
 
 			/*
