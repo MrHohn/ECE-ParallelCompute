@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <mpi.h> /* MPI header file */
 #include <unistd.h>
 
 #include "GameOfLife.h"
@@ -46,9 +45,6 @@ int main(int argc, char** argv) {
     if (game->isMaster() && game->notTooLarge()) {
         game->print();
     }
-
-    /* clean up for MPI */
-    MPI_Finalize();
     
     delete game;
 

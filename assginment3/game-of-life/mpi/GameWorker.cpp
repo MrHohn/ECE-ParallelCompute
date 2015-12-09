@@ -447,22 +447,14 @@ void GameWorker::recvSubBoard() {
 
 int GameWorker::countNeighbours(int row, int col) {
 	int alive = 0;
-	if (checkAlive(row - 1, col - 1))
-		++alive;
-	if (checkAlive(row - 1, col))
-		++alive;
-	if (checkAlive(row - 1, col + 1))
-		++alive;
-	if (checkAlive(row, col - 1))
-		++alive;
-	if (checkAlive(row, col + 1))
-		++alive;
-	if (checkAlive(row + 1, col - 1))
-		++alive;
-	if (checkAlive(row + 1, col))
-		++alive;
-	if (checkAlive(row + 1, col + 1))
-		++alive;
+	if (checkAlive(row - 1, col - 1)) ++alive;
+	if (checkAlive(row - 1, col))     ++alive;
+	if (checkAlive(row - 1, col + 1)) ++alive;
+	if (checkAlive(row, col - 1))     ++alive;
+	if (checkAlive(row, col + 1))     ++alive;
+	if (checkAlive(row + 1, col - 1)) ++alive;
+	if (checkAlive(row + 1, col))     ++alive;
+	if (checkAlive(row + 1, col + 1)) ++alive;
 
 	return alive;
 }

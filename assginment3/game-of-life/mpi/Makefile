@@ -20,3 +20,8 @@ $(EXECUTABLE): $(OBJECTS)
 
 clean:
 	rm -rf *.o $(EXECUTABLE)
+
+run: $(EXECUTABLE)
+	echo "*** now run sample input on 4 processes for 2 iterations ***"
+	@sleep 1
+	mpirun -np 4 -hostfile hostfile ./main 0 0 2

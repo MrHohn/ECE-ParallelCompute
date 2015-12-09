@@ -41,6 +41,8 @@ GameOfLife::~GameOfLife() {
 		delete[] game_board;
 	}
 	delete worker;
+	/* clean up for MPI */
+	MPI_Finalize();
 }
 
 void GameOfLife::initBoard() {
@@ -151,7 +153,7 @@ void GameOfLife::gridAssign() {
 }
 
 void GameOfLife::initWorker() {
-	if (DEBUG && rank == 0) printf("--- Init Worker ---\n");
+	if (DEBUG && rank == 0) printf("--- Init Worker: %d ---\n", rank);
 
 	int row_id, col_id;
 	int worker_row_size = row_per_node;
