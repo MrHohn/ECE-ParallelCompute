@@ -15,6 +15,8 @@ public:
 	void   start();
 	bool   notTooLarge();
 	double getCommCost();
+	double getLastCost();
+
 private:
 	void iterateOnce();
 	void initRandomBoard();

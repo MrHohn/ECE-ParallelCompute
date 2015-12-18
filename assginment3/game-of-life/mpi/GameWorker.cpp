@@ -51,6 +51,7 @@ GameWorker::GameWorker(
 	cur_iteration = 0;
 	num_process = 0;
 	comm_cost = 0;
+	last_recv_cost = 0;
 }
 
 GameWorker::~GameWorker() {
@@ -191,6 +192,7 @@ void GameWorker::iterateOnce() {
 			recvSubBoard();
 	        double comm_end = get_elapsed_mcycles();
 		    comm_cost += (comm_end - comm_start);
+		    last_recv_cost = comm_end - comm_start;
 		}
 		else {
 			sendSubBoard();
@@ -490,4 +492,8 @@ void GameWorker::print() {
 
 double GameWorker::getCommCost() {
 	return comm_cost;
+}
+
+double GameWorker::getLastCost() {
+	return last_recv_cost;
 }

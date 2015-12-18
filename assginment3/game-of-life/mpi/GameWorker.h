@@ -24,6 +24,7 @@ public:
 	void   initBoardMPI();
 	void   iterateOnce();
 	double getCommCost();
+	double getLastCost();
 
 private:
 	void print();
@@ -70,6 +71,7 @@ private:
 	int  num_process;
 	bool updated;
     double comm_cost;
+    double last_recv_cost;
 };
 
 #endif /* GAMEWORKER */

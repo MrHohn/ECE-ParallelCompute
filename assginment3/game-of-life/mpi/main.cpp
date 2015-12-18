@@ -39,7 +39,9 @@ int main(int argc, char** argv) {
         printf("total time consumption:\t\t\t[%.3f] million cycles\n", one_round);
         double comm_cost = game->getCommCost();
         printf("communication time consumption:\t\t[%.3f] million cycles\n", comm_cost);
-        printf("communication time ratio:\t\t%.3f %%\n\n", comm_cost / one_round * 100);
+        printf("communication time ratio:\t\t%.3f %%\n", comm_cost / one_round * 100);
+        double last_cost = game->getLastCost();
+        printf("receiving all boards consumption:\t[%.3f] million cycles\n\n", last_cost);
     }
 
     usleep(1000 * 400);

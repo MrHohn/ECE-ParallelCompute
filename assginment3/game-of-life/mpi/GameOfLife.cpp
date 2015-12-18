@@ -302,3 +302,7 @@ bool GameOfLife::notTooLarge() {
 double GameOfLife::getCommCost() {
 	return worker->getCommCost();
 }
+
+double GameOfLife::getLastCost() {
+	return worker->getLastCost();
+}
