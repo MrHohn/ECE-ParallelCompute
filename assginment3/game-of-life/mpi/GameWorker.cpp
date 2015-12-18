@@ -70,7 +70,7 @@ void GameWorker::initBoardLocal(int** whole_board) {
 
 	int start_row = (row_id - 1) * row_size_normal;
 	int start_col = (col_id - 1) * col_size_normal;
-	if (DEBUG) printf(" start_row: %d\n start_col: %d\n\n", start_row, start_col);
+	// if (DEBUG) printf(" start_row: %d\n start_col: %d\n\n", start_row, start_col);
 	for (int i = -1; i < row_size + 1; ++i) {
 		for (int j = -1; j < col_size + 1; ++j) {
 			if (checkExist(start_row + i, start_col + j)) {
@@ -380,18 +380,16 @@ void GameWorker::recvFromNeighbours() {
 }
 
 void GameWorker::sendSubBoard() {
-	int temp_needed_len = row_size * col_size * 2 + 1;
+	int temp_needed_len = row_size * col_size;
 	// concatenate cells into a char array and send it out
 	char buf[temp_needed_len];
 	char* cur = buf;
 	for (int i = 1; i < row_size + 1; ++i) {
 		for (int j = 1; j < col_size + 1; ++j) {
-			sprintf(cur, "%d,", game_board[i][j]);
-			cur += 2;
+			sprintf(cur, "%d", game_board[i][j]);
+			cur++;
 		}
 	}
-	// add one more space to avoid messy codem
-	sprintf(cur, " ");
 	MPI_Send(buf, temp_needed_len, MPI_CHAR, MASTER, 0, MPI_COMM_WORLD);
 }
 
@@ -429,21 +427,21 @@ void GameWorker::recvSubBoard() {
 		temp_start_col = (temp_col_id - 1) * col_size_normal;
 
 		// finished calculation, now receiving
-		int needed_len = worker_row_size * worker_col_size * 2 + 1;
+		int needed_len = worker_row_size * worker_col_size;
 		char buf[needed_len];
 		MPI_Recv(buf, needed_len, MPI_CHAR, temp_rank, 0, MPI_COMM_WORLD, &status);
 		// if (DEBUG) printf("#%d, buf: %s\n", temp_rank, buf);
 
+		char* tmp = buf;
 		for (int i = 0; i < worker_row_size; ++i) {
 			for (int j = 0; j < worker_col_size; ++j) {
-				char* tmp;
-				if (i == 0 && j == 0) {
-					tmp = strtok(buf, ",");
+				if (*tmp == '1') {
+					whole_board[temp_start_row + i][temp_start_col + j] = ALIVE;
 				}
 				else {
-					tmp = strtok(NULL, ",");
+					whole_board[temp_start_row + i][temp_start_col + j] = DEAD;
 				}
-				whole_board[temp_start_row + i][temp_start_col + j] = atoi(tmp);
+				++tmp;
 			}
 		}
 	}
