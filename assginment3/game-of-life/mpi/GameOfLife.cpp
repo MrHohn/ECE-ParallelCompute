@@ -121,7 +121,7 @@ void GameOfLife::gridAssign() {
 	row_per_node = row_size; // horizontal
 	col_per_node = col_size; // vertical
 
-	for (vector<int>::iterator i = factors.begin(); i < factors.end(); ++i) {
+	for (vector<int>::reverse_iterator i = factors.rbegin(); i < factors.rend(); ++i) {
 		if (row_per_node >= col_per_node) {
 			row_per_node /= *i;
 			num_node_in_row *= *i;
