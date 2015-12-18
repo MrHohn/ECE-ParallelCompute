@@ -36,7 +36,10 @@ int main(int argc, char** argv) {
     // stop timer and print out total cycles
     if (game->isMaster()) {
         double one_round = get_elapsed_mcycles();
-        printf("time consumption:\t\t\t[%.3f] million cycles\n\n", one_round);
+        printf("total time consumption:\t\t\t[%.3f] million cycles\n", one_round);
+        double comm_cost = game->getCommCost();
+        printf("communication time consumption:\t\t[%.3f] million cycles\n", comm_cost);
+        printf("communication time ratio:\t\t%.3f %%\n\n", comm_cost / one_round * 100);
     }
 
     usleep(1000 * 400);

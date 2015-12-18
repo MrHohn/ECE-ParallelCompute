@@ -298,3 +298,7 @@ bool GameOfLife::notTooLarge() {
 	}
 	return false;
 }
+
+double GameOfLife::getCommCost() {
+	return worker->getCommCost();
+}

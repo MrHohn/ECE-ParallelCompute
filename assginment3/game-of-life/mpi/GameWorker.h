@@ -20,9 +20,10 @@ public:
 		int num_node_in_col,
 		int num_iterate);
 	~GameWorker();
-	void initBoardLocal(int** whole_board);
-	void initBoardMPI();
-	void iterateOnce();
+	void   initBoardLocal(int** whole_board);
+	void   initBoardMPI();
+	void   iterateOnce();
+	double getCommCost();
 
 private:
 	void print();
@@ -68,6 +69,7 @@ private:
 	int**whole_board;
 	int  num_process;
 	bool updated;
+    double comm_cost;
 };
 
 #endif /* GAMEWORKER */

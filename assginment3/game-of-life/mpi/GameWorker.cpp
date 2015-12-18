@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "GameWorker.h"
+#include "timing.h"
 #include "debug_config.h"
 
 #define MASTER 0
@@ -24,19 +25,19 @@ GameWorker::GameWorker(
 	int num_node_in_col,
 	int num_iterate) {
 
-	this->row_size =        row_size;
-	this->col_size =        col_size;
-	this->row_id =          row_id;
-	this->col_id =          col_id;
-	this->total_row =       total_row;
-	this->total_col =       total_col;
+	this->row_size        = row_size;
+	this->col_size        = col_size;
+	this->row_id          = row_id;
+	this->col_id          = col_id;
+	this->total_row       = total_row;
+	this->total_col       = total_col;
 	this->row_size_normal = row_size_normal;
 	this->col_size_normal = col_size_normal;
-	this->extra_last_row =  extra_last_row;
-	this->extra_last_col =  extra_last_col;
+	this->extra_last_row  = extra_last_row;
+	this->extra_last_col  = extra_last_col;
 	this->num_node_in_row = num_node_in_row;
 	this->num_node_in_col = num_node_in_col;
-	this->num_iterate =     num_iterate;
+	this->num_iterate     = num_iterate;
 
 	// create the game boards
 	game_board = new int*[row_size + 2];
@@ -49,6 +50,7 @@ GameWorker::GameWorker(
 	updated = false;
 	cur_iteration = 0;
 	num_process = 0;
+	comm_cost = 0;
 }
 
 GameWorker::~GameWorker() {
@@ -147,11 +149,19 @@ void GameWorker::copyBoard(
 
 void GameWorker::iterateOnce() {
 	if (!updated) {
+		// if master, record the communication cost
+		double comm_start;
+		if (row_id == 1 && col_id == 1)
+	        comm_start = get_elapsed_mcycles();
 		// call MPI to get updated neighbours
 		// send out the local copy first
 		sendToNeighbours();
 		// then retrieve remote copies
 		recvFromNeighbours();
+		if (row_id == 1 && col_id == 1) {
+	        double comm_end = get_elapsed_mcycles();
+		    comm_cost += (comm_end - comm_start);
+		}
 	}
 	
 	// now iterate
@@ -176,7 +186,11 @@ void GameWorker::iterateOnce() {
 	// if need to print the process, send intermediate results to master
 	if (cur_iteration == num_iterate || PRINT_PROCESS) {
 		if (row_id == 1 && col_id == 1) {
+			// also record the final receive phase
+	        double comm_start = get_elapsed_mcycles();
 			recvSubBoard();
+	        double comm_end = get_elapsed_mcycles();
+		    comm_cost += (comm_end - comm_start);
 		}
 		else {
 			sendSubBoard();
@@ -472,4 +486,8 @@ void GameWorker::print() {
 		printf("\n");
 	}
 	printf("\n");
+}
+
+double GameWorker::getCommCost() {
+	return comm_cost;
 }

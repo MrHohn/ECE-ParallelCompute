@@ -7,14 +7,14 @@ class GameOfLife {
 public:
     GameOfLife(int row, int col, int num_iterate);
     ~GameOfLife();
-	void initBoard();
-	void gridAssign();
-	void initWorker();
-	bool isMaster();
-	void print();
-	void start();
-	bool notTooLarge();
-
+	void   initBoard();
+	void   gridAssign();
+	void   initWorker();
+	bool   isMaster();
+	void   print();
+	void   start();
+	bool   notTooLarge();
+	double getCommCost();
 private:
 	void iterateOnce();
 	void initRandomBoard();
