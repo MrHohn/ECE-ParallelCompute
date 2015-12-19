@@ -25,3 +25,8 @@ run: $(EXECUTABLE)
 	echo "*** now run sample input on 4 processes for 2 iterations ***"
 	@sleep 1
 	mpirun -np 4 -hostfile hostfile ./main 0 0 2
+
+run20: $(EXECUTABLE)
+	echo "*** now using random 2000*2000 board input on 20 processes for 100 iterations ***"
+	@sleep 1
+	mpirun -np 20 -hostfile hostfile-ece ./main 2000 2000 100
