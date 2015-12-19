@@ -2,31 +2,44 @@
 #include <stdio.h>
 
 #include "GameOfLife.h"
+#include "debug_config.h"
 #include "timing.h"
 
-#define DEBUG 0
-
 int main(int argc, char ** argv) {
+    if (argc < 4) {
+        printf("Please input M, N and K\n");
+        return 1;
+    }
+    int row = atoi(argv[1]);
+    int col = atoi(argv[2]);
+    int num_iterate = atoi(argv[3]);
 
-    // create a container for the game board
-    int row = 2000;
-    int col = 2000;
-
-    GameOfLife game(row, col);
-    game.randomInit();
-    // game.specificInit();
-    if (DEBUG) {
-        game.print();
+    GameOfLife* game;
+    if (row <= 0 || col <= 0) {
+        game = new GameOfLife(6, 4);
+        game->specificInit();
+    }
+    else {
+        game = new GameOfLife(row, col);
+        game->randomInit();
+    }
+    if (game->notTooLarge()) {
+        game->print();
     }
 
     // start to record time consumption
     reset_and_start_timer();
     
-    game.iterateAll(5);
+    game->iterateAll(num_iterate);
 
    // stop timer and print out total cycles
     double one_round = get_elapsed_mcycles();
+    if (game->notTooLarge()) {
+        game->print();
+    }
+    printf("\n-------- Statistic Infomation --------\n\n");
     printf("time consumption:\t\t\t[%.3f] million cycles\n", one_round);
 
+    delete(game);
     return 0;
 }

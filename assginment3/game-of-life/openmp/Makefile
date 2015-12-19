@@ -20,3 +20,13 @@ $(EXECUTABLE): $(OBJECTS)
 
 clean:
 	rm -rf *.o $(EXECUTABLE)
+
+run: $(EXECUTABLE)
+	echo "*** now run sample input for 2 iterations ***"
+	@sleep 1
+	./main 0 0 2
+
+run-large: $(EXECUTABLE)
+	echo "*** now using random 2000*2000 board as input run for 100 iterations ***"
+	@sleep 1
+	./main 2000 2000 100

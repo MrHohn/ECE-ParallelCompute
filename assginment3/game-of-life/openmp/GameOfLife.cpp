@@ -1,10 +1,9 @@
-#include "GameOfLife.h"
 #include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-#define DEBUG 0
-#define OPENMP_ENABLED 1
+#include "GameOfLife.h"
+#include "debug_config.h"
 
 GameOfLife::GameOfLife(int row, int col) {
 	row_size = row;
@@ -119,7 +118,7 @@ void GameOfLife::iterateOnce() {
 void GameOfLife::iterateAll(int iteration) {
 	for (int i = 0; i < iteration; ++i) {
 		iterateOnce();
-		if (DEBUG) print();
+		if (notTooLarge() && DEBUG && i != iteration - 1) print();
 		if (cur_alive == 0) {
 			printf("Game Over at Round%2d.\n", cur_iteration);
 			break;
@@ -149,12 +148,12 @@ bool GameOfLife::checkAlive(int row, int col) {
 int GameOfLife::countNeighbours(int row, int col) {
 	int alive = 0;
 	if (checkAlive(row - 1, col - 1)) ++alive;
-	if (checkAlive(row - 1, col)) ++alive;
+	if (checkAlive(row - 1, col))     ++alive;
 	if (checkAlive(row - 1, col + 1)) ++alive;
-	if (checkAlive(row, col - 1)) ++alive;
-	if (checkAlive(row, col + 1)) ++alive;
+	if (checkAlive(row, col - 1))     ++alive;
+	if (checkAlive(row, col + 1))     ++alive;
 	if (checkAlive(row + 1, col - 1)) ++alive;
-	if (checkAlive(row + 1, col)) ++alive;
+	if (checkAlive(row + 1, col))     ++alive;
 	if (checkAlive(row + 1, col + 1)) ++alive;
 
 	return alive;
@@ -166,4 +165,11 @@ void GameOfLife::copyBoard(int** copyTo, int** copyFrom) {
 			copyTo[i][j] = copyFrom[i][j];
 		}
 	}
+}
+
+bool GameOfLife::notTooLarge() {
+	if (row_size <= 20 && col_size <= 20) {
+		return true;
+	}
+	return false;
 }

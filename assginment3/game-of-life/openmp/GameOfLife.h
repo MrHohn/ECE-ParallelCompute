@@ -14,6 +14,7 @@ public:
 	bool checkAlive(int row, int col);
 	int countNeighbours(int row, int col);
 	void copyBoard(int** copyTo, int** copyFrom);
+	bool notTooLarge();
 
 private:
 	enum LIFE {
