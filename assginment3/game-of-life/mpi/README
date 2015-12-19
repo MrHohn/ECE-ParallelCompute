@@ -22,4 +22,8 @@
  	# hostfile-ece is used for ece-cluster
  	mpirun -np 20 -hostfile hostfile-ece ./main 2000 2000 100
 
- ---------------------------------------------------------------
+ ------------------------- OTHERS ----------------------------
+
+ 	For printing out the procedure for running game, please set the PRINT_PROCESS to 1 in the debug_config.h file and compile again.
+
+ -------------------------------------------------------------

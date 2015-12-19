@@ -19,4 +19,8 @@
  	# run random 2000*2000 board as input for 100 iterations
  	./main 2000 2000 100
 
+ ------------------------- OTHERS ----------------------------
+
+ 	For printing out the procedure for running game, please set the DEBUG to 1 in the debug_config.h file and compile again.
+ 
  ---------------------------------------------------------------
