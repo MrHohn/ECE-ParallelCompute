@@ -1,0 +1,22 @@
+ ----------------------- USING MAKEFILE -------------------------
+ sample commands:
+
+ 	# compile the codes
+	make
+
+ 	# run sample input for 2 iterations
+ 	make run
+
+ 	# run random 2000*2000 board as input for 100 iterations
+ 	make run-large
+
+ ------------------------- USING SHELL ----------------------------
+ sample commands:
+
+ 	# run sample input for 2 iterations
+ 	./main 0 0 2
+
+ 	# run random 2000*2000 board as input for 100 iterations
+ 	./main 2000 2000 100
+
+ ---------------------------------------------------------------

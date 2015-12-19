@@ -1,0 +1,25 @@
+ ----------------------- USING MAKEFILE -------------------------
+ sample commands:
+
+ 	# compile the codes
+	make
+
+ 	# run sample input on 4 processes for 2 iterations
+ 	make run
+
+ 	# run random 2000*2000 board input on 20 processes for 100 iterations
+ 	# make sure we are on ece-cluster and the hostfile is correct
+ 	make run20
+
+ ------------------------- USING SHELL ----------------------------
+ sample commands:
+
+ 	# run sample input on 4 processes for 2 iterations
+ 	mpirun -np 4 -hostfile hostfile ./main 0 0 2
+
+ 	# run random 2000*2000 board input on 20 processes for 100 iterations
+ 	# make sure we are on ece-cluster and the hostfile is correct
+ 	# hostfile-ece is used for ece-cluster
+ 	mpirun -np 20 -hostfile hostfile-ece ./main 2000 2000 100
+
+ ---------------------------------------------------------------
